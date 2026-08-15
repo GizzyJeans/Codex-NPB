@@ -1,0 +1,8 @@
+priority,date,away,home,market,selection,favorite,line,hk_odds,decimal_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,class_at_analysis,actual_stake,blocking_conditions
+1,2026-08-14,Hanshin Tigers,Hiroshima Carp,spread,Hiroshima Carp,Hanshin Tigers,2+60,0.95,1.95,0.6144,0.5000,1.628,0.1876,1.696,WATCH,0,rules and lineups unconfirmed
+2,2026-08-14,Yomiuri Giants,Chunichi Dragons,spread,Yomiuri Giants,Chunichi Dragons,1+80,0.95,1.95,0.6071,0.5000,1.647,0.1767,1.716,WATCH,0,rules and lineups unconfirmed
+3,2026-08-14,Chiba Lotte Marines,Saitama Seibu Lions,total,OVER,,7+50,0.93,1.93,0.6019,0.5000,1.661,0.1498,1.733,INVALID_STALE,0,starter changed from Kona Takahashi to Taishi Mameda
+4,2026-08-14,Tohoku Rakuten Golden Eagles,Fukuoka SoftBank Hawks,spread,Tohoku Rakuten Golden Eagles,Fukuoka SoftBank Hawks,2-25,0.95,1.95,0.5969,0.5000,1.675,0.1478,1.750,WATCH,0,rules and lineups unconfirmed
+5,2026-08-14,Yomiuri Giants,Chunichi Dragons,total,UNDER,,6-50,0.93,1.93,0.5884,0.5000,1.699,0.1280,1.772,WATCH,0,rules and lineups unconfirmed
+6,2026-08-14,Tohoku Rakuten Golden Eagles,Fukuoka SoftBank Hawks,total,UNDER,,8+50,0.93,1.93,0.5825,0.5000,1.717,0.1180,1.789,WATCH,0,rules and lineups unconfirmed
+7,2026-08-14,Hokkaido Nippon-Ham Fighters,Orix Buffaloes,total,OVER,,6.5,0.93,1.93,0.5580,0.5000,1.792,0.0770,1.864,WATCH,0,rules and lineups unconfirmed

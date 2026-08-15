@@ -1,0 +1,8 @@
+priority,away,home,selection,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,settlement_note,official_source
+1,Hanshin Tigers,Hiroshima Carp,Hiroshima Carp,1,6,7,WIN,1000,950,0,0,underdog won outright,https://npb.jp/bis/2026/games/gm20260814.html
+2,Yomiuri Giants,Chunichi Dragons,Yomiuri Giants,1,0,1,WIN,1000,950,0,0,underdog won outright,https://npb.jp/bis/2026/games/gm20260814.html
+3,Chiba Lotte Marines,Saitama Seibu Lions,OVER 7+50,0,7,7,PARTIAL_WIN,1000,465,0,0,common Taiwan tail assumption; stale market excluded from executable record,https://npb.jp/bis/2026/games/gm20260814.html
+4,Tohoku Rakuten Golden Eagles,Fukuoka SoftBank Hawks,Tohoku Rakuten Golden Eagles,5,2,7,WIN,1000,950,0,0,underdog won outright,https://npb.jp/bis/2026/games/gm20260814.html
+5,Yomiuri Giants,Chunichi Dragons,UNDER 6-50,1,0,1,WIN,1000,930,0,0,total below base line,https://npb.jp/bis/2026/games/gm20260814.html
+6,Tohoku Rakuten Golden Eagles,Fukuoka SoftBank Hawks,UNDER 8+50,5,2,7,WIN,1000,930,0,0,total below base line,https://npb.jp/bis/2026/games/gm20260814.html
+7,Hokkaido Nippon-Ham Fighters,Orix Buffaloes,OVER 6.5,2,6,8,WIN,1000,930,0,0,total above half line,https://npb.jp/bis/2026/games/gm20260814.html
