@@ -1,0 +1,31 @@
+{
+  "game": {
+    "date": "2026-08-14",
+    "away": "Yomiuri Giants",
+    "home": "Chunichi Dragons"
+  },
+  "model": {
+    "away_mu": 3.10,
+    "home_mu": 2.65,
+    "dispersion": 14.0,
+    "final_draw_share": 0.21,
+    "max_runs": 24
+  },
+  "market": {
+    "kind": "total",
+    "selection": "under",
+    "line": "6-50",
+    "hong_kong_odds": 0.93,
+    "opposite_hk_odds": 0.93
+  },
+  "eligibility": {
+    "rules_confirmed": false,
+    "starters_confirmed": true,
+    "lineups_confirmed": false,
+    "data_complete": false,
+    "market_current": false
+  },
+  "bankroll": 100000,
+  "max_stake": 1000,
+  "kelly_fraction": 0.25
+}
