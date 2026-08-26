@@ -8,6 +8,7 @@ from datetime import date
 from pathlib import Path
 
 from .backtest import backtest
+from .board import price_board, read_board
 from .pipeline import build_slate, fetch_bundle, load_bundle, save_bundle
 from .projection import ProjectionSettings
 from .sources import NPBOfficialClient
@@ -155,6 +156,54 @@ def backtest_main(argv: list[str] | None = None) -> int:
         )
     for warning in result.warnings:
         print(f"WARNING: {warning}")
+    return 0
+
+
+def board_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Price a Taiwanese board against the projected slate"
+    )
+    parser.add_argument("board", type=Path, help="board CSV")
+    parser.add_argument("--bundle", type=Path, default=DEFAULT_BUNDLE)
+    parser.add_argument("--slate", type=Path, required=True, help="slate directory")
+    parser.add_argument(
+        "--min-ev", type=float, default=0.0, help="only show markets above this EV"
+    )
+    args = parser.parse_args(argv)
+
+    games = read_board(args.board)
+    bundle = load_bundle(args.bundle)
+    calibration = bundle["calibration"]
+    projections = {}
+    for path in sorted(args.slate.glob("*.json")):
+        entry = json.loads(path.read_text(encoding="utf-8"))
+        projections[(entry["game"]["away"], entry["game"]["home"])] = entry["model"]
+
+    priced = price_board(
+        games,
+        projections,
+        dispersion=calibration["dispersion"],
+        final_draw_share=calibration["final_draw_share"],
+    )
+    shown = [market for market in priced if market.expected_value >= args.min_ev]
+    shown.sort(key=lambda market: -market.expected_value)
+
+    print(f"{len(priced)} markets priced, {len(shown)} at or above EV {args.min_ev:+.2%}\n")
+    header = (
+        f"{'game':<34}{'market':<8}{'selection':<26}{'line':>6}"
+        f"{'model p':>9}{'EV':>9}{'gap(runs)':>11}{'status':>7}"
+    )
+    print(header)
+    for market in shown:
+        name = f"{market.away[:15]}@{market.home[:13]}"
+        print(
+            f"{name:<34}{market.market:<8}{market.selection[:24]:<26}{market.line:>6}"
+            f"{market.model_probability:>9.4f}{market.expected_value:>+9.4f}"
+            f"{market.expectation_gap:>+11.2f}{market.status:>7}"
+        )
+    warnings = {warning for market in priced for warning in market.warnings}
+    for warning in sorted(warnings):
+        print(f"\nWARNING: {warning}")
     return 0
 
 

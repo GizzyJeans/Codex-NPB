@@ -51,6 +51,9 @@ TAIL_RE = re.compile(r"^(\d+(?:\.\d+)?)(?:([+-])(\d{2}))?$")
 
 def parse_tail_line(value: str) -> TailLine:
     text = value.strip().replace(" ", "")
+    # Boards write a level line as "7平"; the character carries no extra meaning.
+    if text.endswith("平"):
+        text = text[:-1]
     match = TAIL_RE.fullmatch(text)
     if not match:
         raise ModelError(
