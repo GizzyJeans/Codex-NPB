@@ -13,6 +13,9 @@ dependencies = []
 [project.scripts]
 codex-npb = "codex_npb.cli:main"
 codex-npb-ledger = "codex_npb.ledger:main"
+codex-npb-fetch = "codex_npb.pipeline_cli:fetch_main"
+codex-npb-slate = "codex_npb.pipeline_cli:slate_main"
+codex-npb-backtest = "codex_npb.pipeline_cli:backtest_main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

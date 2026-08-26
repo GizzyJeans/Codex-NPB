@@ -9,3 +9,8 @@ build/
 .env
 .env.*
 !.env.example
+
+# Fetched data snapshots and generated slates: refresh these per analysis,
+# never treat a committed copy as current.
+data/
+slates/
