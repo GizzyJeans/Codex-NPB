@@ -4,11 +4,20 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .backtest import backtest
 from .board import price_board, read_board
+from .ledger import append as ledger_append
+from .settlement import (
+    OFFICIAL_SOURCE,
+    settle_board,
+    summarize,
+    write_candidates,
+    write_projections,
+    write_settlements,
+)
 from .pipeline import build_slate, fetch_bundle, load_bundle, save_bundle
 from .projection import ProjectionSettings
 from .sources import NPBOfficialClient
@@ -204,6 +213,119 @@ def board_main(argv: list[str] | None = None) -> int:
     warnings = {warning for market in priced for warning in market.warnings}
     for warning in sorted(warnings):
         print(f"\nWARNING: {warning}")
+    return 0
+
+
+def settle_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Settle a pre-game board against official NPB results"
+    )
+    parser.add_argument("game_date", help="YYYY-MM-DD")
+    parser.add_argument("--board", type=Path, required=True)
+    parser.add_argument("--slate", type=Path, required=True)
+    parser.add_argument("--bundle", type=Path, default=DEFAULT_BUNDLE)
+    parser.add_argument("--records", type=Path, default=Path("records"))
+    parser.add_argument("--ledger", type=Path, default=Path("records/ledger.jsonl"))
+    parser.add_argument("--shadow-stake", type=float, default=1_000)
+    parser.add_argument("--delay", type=float, default=1.0)
+    parser.add_argument(
+        "--recorded-before-first-pitch",
+        action="store_true",
+        help="mark the ledger entry as a genuine prospective record",
+    )
+    parser.add_argument("--write", action="store_true", help="write records to disk")
+    args = parser.parse_args(argv)
+
+    target = date.fromisoformat(args.game_date)
+    games = read_board(args.board)
+    bundle = load_bundle(args.bundle)
+    calibration = bundle["calibration"]
+
+    projections = {}
+    for path in sorted(args.slate.glob("*.json")):
+        entry = json.loads(path.read_text(encoding="utf-8"))
+        projections[(entry["game"]["away"], entry["game"]["home"])] = entry
+
+    client = NPBOfficialClient(target.year, delay_seconds=args.delay)
+    results = {(game.away, game.home): game for game in client.results_for(target)}
+
+    priced = price_board(
+        games,
+        {key: entry["model"] for key, entry in projections.items()},
+        dispersion=calibration["dispersion"],
+        final_draw_share=calibration["final_draw_share"],
+    )
+    settled = settle_board(priced, games, results, shadow_stake=args.shadow_stake)
+    summary = summarize(settled)
+
+    print(f"{target}: settled {summary.graded} markets over {len(games)} games\n")
+    print(f"{'game':<32}{'market':<8}{'selection':<24}{'line':>6}{'EV':>8}{'result':>14}{'shadow':>9}")
+    for row in settled:
+        entry = row.market
+        name = f"{entry.away[:14]}@{entry.home[:12]}"
+        print(
+            f"{name:<32}{entry.market:<8}{entry.selection[:22]:<24}{entry.line:>6}"
+            f"{entry.expected_value:>+8.3f}{row.result:>14}{row.shadow_pnl:>+9.0f}"
+        )
+    print(
+        f"\nWATCH  {summary.watch_wins}-{summary.watch_losses}  "
+        f"shadow {summary.watch_shadow_pnl:+,.0f} on {summary.watch_shadow_stake:,.0f} "
+        f"(ROI {summary.watch_roi:+.1%})"
+    )
+    print(
+        f"ALL    shadow {summary.all_shadow_pnl:+,.0f} on {summary.all_shadow_stake:,.0f} "
+        f"(ROI {summary.all_roi:+.1%})"
+    )
+    print(f"ACTUAL stake {summary.actual_stake:,.0f}  P&L {summary.actual_pnl:+,.0f}")
+
+    if not args.write:
+        print("\n(dry run; pass --write to record)")
+        return 0
+
+    source = OFFICIAL_SOURCE.format(year=target.year, stamp=target.strftime("%Y%m%d"))
+    directory = args.records / target.isoformat()
+    write_projections(
+        projections,
+        results,
+        directory / "game_projections.csv",
+        model_version="npb-pipeline-v0.2",
+        record_origin=(
+            "prospective_pre_first_pitch"
+            if args.recorded_before_first_pitch
+            else "post_hoc"
+        ),
+    )
+    write_candidates(settled, directory / "candidates.csv")
+    write_settlements(settled, directory / "settlements.csv", official_source=source)
+    record = ledger_append(
+        args.ledger,
+        {
+            "event_type": "BOARD_SETTLEMENT",
+            "game_date": target.isoformat(),
+            "schema_version": 1,
+            "recorded_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "model_version": "npb-pipeline-v0.2",
+            "markets_graded": summary.graded,
+            "formal_bets": summary.formal,
+            "watch_candidates": summary.watch,
+            "watch_record": f"{summary.watch_wins}-{summary.watch_losses}",
+            "watch_shadow_stake": summary.watch_shadow_stake,
+            "watch_shadow_pnl": summary.watch_shadow_pnl,
+            "all_shadow_stake": summary.all_shadow_stake,
+            "all_shadow_pnl": summary.all_shadow_pnl,
+            "actual_stake": summary.actual_stake,
+            "actual_pnl": summary.actual_pnl,
+            "prospective_eligible": bool(args.recorded_before_first_pitch),
+            "source": source,
+            "notes": (
+                "Board and projections committed before first pitch; "
+                "classifications preserved as priced."
+                if args.recorded_before_first_pitch
+                else "Settled after the fact; not a prospective record."
+            ),
+        },
+    )
+    print(f"\nwrote {directory}/ and ledger sequence {record['sequence']}")
     return 0
 
 

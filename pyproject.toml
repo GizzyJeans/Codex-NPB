@@ -17,6 +17,7 @@ codex-npb-fetch = "codex_npb.pipeline_cli:fetch_main"
 codex-npb-slate = "codex_npb.pipeline_cli:slate_main"
 codex-npb-backtest = "codex_npb.pipeline_cli:backtest_main"
 codex-npb-board = "codex_npb.pipeline_cli:board_main"
+codex-npb-settle = "codex_npb.pipeline_cli:settle_main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
