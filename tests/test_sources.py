@@ -70,7 +70,7 @@ SCHEDULE = """
 <div class="team2">阪神</div></td>
 <td><div class="place">バンテリンドーム</div><div class="time">18:00</div></td>
 <td><div class="comment"></div></td>
-<td><div class="pit">先発：涌井</div><div class="pit">先発：伊藤将</div></td>
+<td><div class="pit">勝：涌井</div><div class="pit">敗：伊藤将</div></td>
 </tr>
 """
 
@@ -147,6 +147,15 @@ class GameParserTests(unittest.TestCase):
         played = games[date(2026, 8, 26)]
         self.assertEqual(played.status, "final")
         self.assertEqual((played.away_score, played.home_score), (2, 5))
+
+    def test_decision_pitchers_are_not_read_as_starters(self):
+        # A final row replaces 先発： with 勝：/敗：. Reading those as starters
+        # would attribute the winning pitcher to the start.
+        games = {g.game_date: g for g in _parse_schedule(SCHEDULE, 2026, 8)}
+        played = games[date(2026, 8, 26)]
+        self.assertEqual(played.home_starter, "")
+        self.assertEqual(played.away_starter, "")
+        self.assertFalse(played.starters_announced)
 
     def test_other_months_are_filtered_out(self):
         self.assertEqual(list(_parse_schedule(SCHEDULE, 2026, 7)), [])

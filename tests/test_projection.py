@@ -1,5 +1,6 @@
 import unittest
 
+from codex_npb.staff import StaffSplit
 from codex_npb.projection import (
     ProjectionError,
     ProjectionSettings,
@@ -10,16 +11,33 @@ from codex_npb.projection import (
 )
 
 
+def even_staff(rotation_ra9=3.5, bullpen_ra9=3.5, rotation_innings=600.0, bullpen_innings=360.0):
+    """A staff split where every club is league-average by construction."""
+    return {
+        name: StaffSplit(
+            team=name,
+            league="central",
+            rotation_innings=rotation_innings,
+            rotation_runs=round(rotation_ra9 * rotation_innings / 9),
+            bullpen_innings=bullpen_innings,
+            bullpen_runs=round(bullpen_ra9 * bullpen_innings / 9),
+        )
+        for name in NAMES
+    }
+
+
+NAMES = [
+    "Yomiuri Giants",
+    "Hanshin Tigers",
+    "Chunichi Dragons",
+    "Hiroshima Carp",
+    "Tokyo Yakult Swallows",
+    "Yokohama DeNA BayStars",
+]
+
+
 def even_league(runs=350, games=100):
-    names = [
-        "Yomiuri Giants",
-        "Hanshin Tigers",
-        "Chunichi Dragons",
-        "Hiroshima Carp",
-        "Tokyo Yakult Swallows",
-        "Yokohama DeNA BayStars",
-    ]
-    return {n: TeamSeason(n, "central", games, runs, runs) for n in names}
+    return {n: TeamSeason(n, "central", games, runs, runs) for n in NAMES}
 
 
 class ShrinkTests(unittest.TestCase):
@@ -115,8 +133,19 @@ class ProjectionTests(unittest.TestCase):
             away_starter=starter,
             home_starter=starter,
             park_factor=1.0,
+            staff=even_staff(),
         )
         self.assertTrue(projection.data_complete)
+
+    def test_missing_staff_split_lowers_data_complete(self):
+        projection = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=even_league(),
+            park_factor=1.0,
+        )
+        self.assertFalse(projection.inputs_used["staff_split"])
+        self.assertTrue(any("double-counts" in note for note in projection.notes))
 
     def test_unknown_team_rejected(self):
         with self.assertRaises(KeyError):
@@ -129,3 +158,90 @@ class ProjectionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BullpenDecompositionTests(unittest.TestCase):
+    """The rotation must not be counted twice via the club's overall rate."""
+
+    def staff_with_bad_bullpen(self):
+        staff = even_staff()
+        staff["Yomiuri Giants"] = StaffSplit(
+            team="Yomiuri Giants",
+            league="central",
+            rotation_innings=600.0,
+            rotation_runs=round(3.0 * 600 / 9),   # strong rotation
+            bullpen_innings=360.0,
+            bullpen_runs=round(5.0 * 360 / 9),    # weak bullpen
+        )
+        return staff
+
+    def test_weak_bullpen_raises_opposing_runs(self):
+        seasons = even_league()
+        ace = StarterSeason("Ace", "Yomiuri Giants", innings_pitched=150, runs_allowed=50)
+        balanced = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=seasons,
+            home_starter=ace,
+            staff=even_staff(),
+        )
+        bad_pen = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=seasons,
+            home_starter=ace,
+            staff=self.staff_with_bad_bullpen(),
+        )
+        self.assertGreater(bad_pen.away_mu, balanced.away_mu)
+
+    def test_league_innings_split_is_used_when_not_overridden(self):
+        # 600 rotation innings against 360 relief innings is a 0.625 share.
+        seasons = even_league()
+        starter = StarterSeason("A", "x", innings_pitched=200, runs_allowed=0)
+        projection = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=seasons,
+            home_starter=starter,
+            staff=even_staff(),
+        )
+        # With a shutout starter shrunk toward league, the blend must sit
+        # between a pure-rotation and a pure-bullpen reading.
+        self.assertLess(projection.away_mu, 3.5)
+        self.assertGreater(projection.away_mu, 0.0)
+
+    def test_explicit_share_overrides_the_league_split(self):
+        seasons = even_league()
+        ace = StarterSeason("Ace", "Yomiuri Giants", innings_pitched=150, runs_allowed=25)
+        heavy = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=seasons,
+            home_starter=ace,
+            staff=even_staff(),
+            settings=ProjectionSettings(starter_innings_share=0.9),
+        )
+        light = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=seasons,
+            home_starter=ace,
+            staff=even_staff(),
+            settings=ProjectionSettings(starter_innings_share=0.3),
+        )
+        self.assertLess(heavy.away_mu, light.away_mu)
+
+    def test_unknown_starter_falls_back_to_the_club_rotation_not_overall(self):
+        projection = project_game(
+            away="Hanshin Tigers",
+            home="Yomiuri Giants",
+            seasons=even_league(),
+            staff=self.staff_with_bad_bullpen(),
+        )
+        self.assertTrue(
+            any("rotation rate used in its place" in note for note in projection.notes)
+        )
+
+    def test_share_outside_zero_to_one_rejected(self):
+        with self.assertRaises(ProjectionError):
+            ProjectionSettings(starter_innings_share=1.4)

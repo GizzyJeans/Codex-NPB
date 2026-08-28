@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable, Mapping
 
+from .staff import LeagueStaffContext, StaffSplit
 from .teams import resolve
 
 
@@ -71,16 +72,23 @@ class ProjectionSettings:
     stop a small sample from producing a confident-looking projection.
     """
 
-    starter_innings_share: float = 0.60
+    starter_innings_share: float | None = None
     team_shrinkage_games: float = 30.0
+    bullpen_shrinkage_innings: float = 120.0
     starter_shrinkage_innings: float = 60.0
     home_field_advantage: float = 0.030
     max_park_factor: float = 1.25
     min_park_factor: float = 0.80
 
+    FALLBACK_STARTER_SHARE = 0.62
+
     def __post_init__(self) -> None:
-        if not 0 <= self.starter_innings_share <= 1:
+        if self.starter_innings_share is not None and not (
+            0 <= self.starter_innings_share <= 1
+        ):
             raise ProjectionError("starter_innings_share must be between 0 and 1")
+        if self.bullpen_shrinkage_innings < 0:
+            raise ProjectionError("bullpen_shrinkage_innings must be non-negative")
         if self.team_shrinkage_games < 0 or self.starter_shrinkage_innings < 0:
             raise ProjectionError("shrinkage constants must be non-negative")
         if abs(self.home_field_advantage) > 0.2:
@@ -161,6 +169,7 @@ def project_game(
     away_starter: StarterSeason | None = None,
     home_starter: StarterSeason | None = None,
     park_factor: float | None = None,
+    staff: Mapping[str, StaffSplit] | None = None,
 ) -> GameProjection:
     """Project expected runs for one game.
 
@@ -211,26 +220,93 @@ def project_game(
     away_defense = defense_index(away_season)
     home_defense = defense_index(home_season)
 
-    def blend_starter(
-        team_defense: float, starter: StarterSeason | None, label: str
-    ) -> float:
-        if starter is None:
-            notes.append(f"{label} starter unknown; club run prevention used unadjusted")
-            return team_defense
-        # Shrink in raw runs-per-9 units toward the league rate, then index it.
-        # A nine-inning game makes league runs/game a fair stand-in for league RA9.
-        starter_rate = shrink(
-            starter.ra9,
-            baseline,
-            starter.innings_pitched,
-            settings.starter_shrinkage_innings,
-        )
-        starter_index = starter_rate / baseline
-        share = settings.starter_innings_share
-        return share * starter_index + (1 - share) * team_defense
+    def staff_context(league: str) -> LeagueStaffContext | None:
+        if not staff:
+            return None
+        try:
+            return LeagueStaffContext.from_splits(league, staff.values())
+        except Exception:
+            return None
 
-    away_defense_effective = blend_starter(away_defense, away_starter, "away")
-    home_defense_effective = blend_starter(home_defense, home_starter, "home")
+    def blend_starter(
+        season: TeamSeason,
+        team_defense: float,
+        starter: StarterSeason | None,
+        label: str,
+    ) -> float:
+        """Combine the announced starter with the bullpen behind him.
+
+        The two halves of a game are priced against different pools. A
+        starter is measured against league rotation scoring and the relief
+        corps against league bullpen scoring, because NPB bullpens allow
+        materially more per nine than rotations do. Blending a starter
+        against the club's *overall* rate instead would count the rotation
+        twice, since the overall rate already contains it.
+        """
+        split = staff.get(season.team) if staff else None
+        context = staff_context(season.league)
+        if split is None or context is None:
+            notes.append(
+                f"{label} staff split unavailable; club run prevention used for the "
+                "whole game, which double-counts the rotation"
+            )
+            if starter is None:
+                notes.append(f"{label} starter unknown; club rate used unadjusted")
+                return team_defense
+            starter_rate = shrink(
+                starter.ra9,
+                baseline,
+                starter.innings_pitched,
+                settings.starter_shrinkage_innings,
+            )
+            share = (
+                settings.starter_innings_share
+                if settings.starter_innings_share is not None
+                else ProjectionSettings.FALLBACK_STARTER_SHARE
+            )
+            return share * (starter_rate / baseline) + (1 - share) * team_defense
+
+        share = (
+            settings.starter_innings_share
+            if settings.starter_innings_share is not None
+            else context.starter_innings_share
+        )
+        bullpen_rate = shrink(
+            split.bullpen_ra9,
+            context.bullpen_ra9,
+            split.bullpen_innings,
+            settings.bullpen_shrinkage_innings,
+        )
+        bullpen_index = bullpen_rate / context.bullpen_ra9
+
+        if starter is None:
+            notes.append(
+                f"{label} starter unknown; club rotation rate used in its place"
+            )
+            rotation_rate = shrink(
+                split.rotation_ra9,
+                context.rotation_ra9,
+                split.rotation_innings,
+                settings.starter_shrinkage_innings,
+            )
+            starter_index = rotation_rate / context.rotation_ra9
+        else:
+            starter_rate = shrink(
+                starter.ra9,
+                context.rotation_ra9,
+                starter.innings_pitched,
+                settings.starter_shrinkage_innings,
+            )
+            starter_index = starter_rate / context.rotation_ra9
+
+        return share * starter_index + (1 - share) * bullpen_index
+
+    away_defense_effective = blend_starter(
+        away_season, away_defense, away_starter, "away"
+    )
+    home_defense_effective = blend_starter(
+        home_season, home_defense, home_starter, "home"
+    )
 
     factor = 1.0 if park_factor is None else float(park_factor)
     if park_factor is None:
@@ -262,6 +338,7 @@ def project_game(
             "away_starter": away_starter is not None,
             "home_starter": home_starter is not None,
             "park_factor": park_factor is not None,
+            "staff_split": bool(staff),
         },
         notes=notes,
     )

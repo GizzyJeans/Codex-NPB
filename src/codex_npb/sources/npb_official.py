@@ -405,8 +405,9 @@ def _parse_schedule(document: str, year: int, month: int) -> Iterator[ScheduledG
 
     Each ``<tr id="dateMMDD">`` is one game. ``team1`` is the home club and
     ``team2`` the visitor; the two ``pit`` cells carry the announced starters
-    in the same order (home first). Starter cells are surname-only and are
-    empty until NPB publishes the 予告先発.
+    in the same order (home first). Starter cells are surname-only, are empty
+    until NPB publishes the 予告先発, and switch to 勝：/敗： decisions once
+    the game is final — only 先発 cells are read here.
     """
     for match in _SCHEDULE_ROW_RE.finditer(document):
         month_day = match.group("md")
@@ -423,9 +424,13 @@ def _parse_schedule(document: str, year: int, month: int) -> Iterator[ScheduledG
             away = resolve(away_raw)
         except KeyError:
             continue
+        # Once a game is final the same cells carry 勝：/敗： (the decision
+        # pitchers), not 先発：. Only an announced starter may populate these
+        # fields, or historical rows would silently report winners as starters.
         starters = [
             _strip_tags(cell).removeprefix("先発：").strip()
             for cell in _PIT_RE.findall(body)
+            if "先発" in _strip_tags(cell)
         ]
         starters += ["", ""]
         weather_match = _WEATHER_RE.search(body)

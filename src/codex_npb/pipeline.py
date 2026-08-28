@@ -23,6 +23,7 @@ from .projection import (
     project_game,
 )
 from .roster import StarterMatch, match_starter
+from .staff import StaffSplit, split_all
 from .sources import NPBOfficialClient
 from .teams import TEAMS
 
@@ -40,6 +41,7 @@ class DataBundle:
     rosters: dict[str, list[dict]]
     calibration: SeasonCalibration
     schedule: list[dict]
+    staff: dict[str, StaffSplit] = field(default_factory=dict)
     schema_version: int = SCHEMA_VERSION
 
     def to_json(self) -> dict:
@@ -61,6 +63,7 @@ class DataBundle:
                 },
             },
             "schedule": self.schedule,
+            "staff": {team: asdict(split) for team, split in self.staff.items()},
         }
 
 
@@ -92,6 +95,9 @@ def fetch_bundle(
         team.english: [asdict(line) for line in client.pitchers(team)] for team in TEAMS
     }
     calibration = calibrate_season(client.season_game_log(months))
+    staff = split_all(
+        rosters, {name: row.league for name, row in team_seasons.items()}
+    )
     schedule = [
         {**asdict(game), "game_date": game.game_date.isoformat()}
         for month in months
@@ -104,6 +110,7 @@ def fetch_bundle(
         rosters=rosters,
         calibration=calibration,
         schedule=schedule,
+        staff=staff,
     )
 
 
@@ -205,6 +212,9 @@ def build_slate(bundle: dict, target: date, *, settings: ProjectionSettings | No
         name: TeamSeason(**row) for name, row in bundle["team_seasons"].items()
     }
     park_factors = calibration.get("park_factors", {})
+    staff = {
+        team: StaffSplit(**row) for team, row in bundle.get("staff", {}).items()
+    }
     entries: list[SlateEntry] = []
 
     for row in bundle["schedule"]:
@@ -225,6 +235,7 @@ def build_slate(bundle: dict, target: date, *, settings: ProjectionSettings | No
             away_starter=away_match.starter if away_match else None,
             home_starter=home_match.starter if home_match else None,
             park_factor=factor,
+            staff=staff or None,
         )
         blocking = _blocking_conditions(row, away_match, home_match, park, projection)
         entries.append(
