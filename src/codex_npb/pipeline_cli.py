@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from .backtest import backtest
@@ -376,6 +376,109 @@ def record_main(argv: list[str] | None = None) -> int:
             "  The filter is picking worse than pricing every market, so it is\n"
             "  destroying value rather than merely failing to add it."
         )
+    return 0
+
+
+def _jst_today() -> date:
+    """The current date in Japan, which is the date NPB games are keyed by."""
+    return (datetime.now(timezone.utc) + timedelta(hours=9)).date()
+
+
+def _pending_settlements(boards: Path, records: Path, before: date) -> list[date]:
+    """Boards that were priced but never settled, oldest first."""
+    pending = []
+    for path in sorted(boards.glob("*.csv")):
+        try:
+            day = date.fromisoformat(path.stem)
+        except ValueError:
+            continue
+        if day >= before:
+            continue
+        if not (records / day.isoformat() / "settlements.csv").exists():
+            pending.append(day)
+    return pending
+
+
+def daily_main(argv: list[str] | None = None) -> int:
+    """One run of the daily cycle: settle what finished, prepare what is next.
+
+    Scheduled for 15:00 UTC, which is midnight in Japan. By then the day's
+    games are final and the next day's 予告先発 are published, and it still
+    leaves thirteen hours before the earliest possible first pitch at
+    04:00 UTC.
+    """
+    parser = argparse.ArgumentParser(description="Run the daily NPB cycle")
+    parser.add_argument("--date", default=None, help="target date; defaults to today in JST")
+    parser.add_argument("--bundle", type=Path, default=DEFAULT_BUNDLE)
+    parser.add_argument("--boards", type=Path, default=Path("boards"))
+    parser.add_argument("--slates", type=Path, default=Path("slates"))
+    parser.add_argument("--records", type=Path, default=Path("records"))
+    parser.add_argument("--delay", type=float, default=0.5)
+    parser.add_argument("--skip-settle", action="store_true")
+    args = parser.parse_args(argv)
+
+    target = date.fromisoformat(args.date) if args.date else _jst_today()
+    print(f"=== daily cycle for {target} (JST) ===\n")
+
+    settled_days: list[date] = []
+    if not args.skip_settle:
+        pending = _pending_settlements(args.boards, args.records, target)
+        if not pending:
+            print("settle: nothing pending\n")
+        for day in pending:
+            slate = args.slates / day.isoformat()
+            if not slate.exists():
+                print(f"settle {day}: no slate directory, skipped\n")
+                continue
+            print(f"--- settling {day} ---")
+            try:
+                settle_main([
+                    day.isoformat(),
+                    "--board", str(args.boards / f"{day.isoformat()}.csv"),
+                    "--slate", str(slate),
+                    "--bundle", str(args.bundle),
+                    "--records", str(args.records),
+                    "--delay", str(args.delay),
+                    "--write", "--recorded-before-first-pitch",
+                ])
+                settled_days.append(day)
+            except Exception as error:  # a bad day must not block the next slate
+                print(f"settle {day} failed: {error}")
+            print()
+
+    print("--- refreshing data ---")
+    fetch_main([
+        "--year", str(target.year),
+        "--out", str(args.bundle),
+        "--delay", str(args.delay),
+    ])
+    print()
+
+    print(f"--- slate for {target} ---")
+    slate_dir = args.slates / target.isoformat()
+    slate_status = slate_main([
+        target.isoformat(),
+        "--bundle", str(args.bundle),
+        "--out", str(slate_dir),
+    ])
+    if slate_status != 0:
+        print(f"\nno games scheduled for {target}; nothing to prepare")
+
+    board = args.boards / f"{target.isoformat()}.csv"
+    print()
+    if board.exists():
+        print(f"--- pricing {board} ---")
+        board_main([
+            str(board), "--bundle", str(args.bundle), "--slate", str(slate_dir),
+        ])
+    else:
+        print(f"NEXT: no board at {board}.")
+        print("      Transcribe the day's lines into that file, then run:")
+        print(f"      codex-npb-board {board} --slate {slate_dir}")
+        print("      Commit it before first pitch or the day is not a prospective record.")
+
+    if settled_days:
+        print(f"\nsettled: {', '.join(day.isoformat() for day in settled_days)}")
     return 0
 
 
