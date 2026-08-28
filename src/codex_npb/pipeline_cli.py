@@ -10,6 +10,7 @@ from pathlib import Path
 from .backtest import backtest
 from .board import price_board, read_board
 from .ledger import append as ledger_append
+from .track_record import collect
 from .settlement import (
     OFFICIAL_SOURCE,
     settle_board,
@@ -326,6 +327,55 @@ def settle_main(argv: list[str] | None = None) -> int:
         },
     )
     print(f"\nwrote {directory}/ and ledger sequence {record['sequence']}")
+    return 0
+
+
+def record_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Cumulative shadow record across every settled day"
+    )
+    parser.add_argument("--records", type=Path, default=Path("records"))
+    args = parser.parse_args(argv)
+
+    track = collect(args.records)
+    if not track.days:
+        print(f"no settled days found under {args.records}")
+        return 1
+
+    print(
+        f"{'date':<13}{'WATCH':>7}{'W-L':>7}{'stake':>9}{'P&L':>9}{'ROI':>9}"
+        f"{'  |':>4}{'all':>6}{'stake':>9}{'P&L':>9}{'ROI':>9}"
+    )
+    for day in track.days:
+        print(
+            f"{day.game_date:<13}{day.watch_markets:>7}"
+            f"{f'{day.watch_wins}-{day.watch_losses}':>7}{day.watch_stake:>9,.0f}"
+            f"{day.watch_pnl:>+9,.0f}{day.watch_roi:>9.1%}{'  |':>4}"
+            f"{day.all_markets:>6}{day.all_stake:>9,.0f}{day.all_pnl:>+9,.0f}"
+            f"{day.all_roi:>9.1%}"
+        )
+    print("-" * 94)
+    print(
+        f"{'cumulative':<13}{sum(d.watch_markets for d in track.days):>7}"
+        f"{f'{sum(d.watch_wins for d in track.days)}-{sum(d.watch_losses for d in track.days)}':>7}"
+        f"{track.watch_stake:>9,.0f}{track.watch_pnl:>+9,.0f}{track.watch_roi:>9.1%}"
+        f"{'  |':>4}{sum(d.all_markets for d in track.days):>6}{track.all_stake:>9,.0f}"
+        f"{track.all_pnl:>+9,.0f}{track.all_roi:>9.1%}"
+    )
+    print(f"\nactual P&L {track.actual_pnl:+,.0f}")
+    if track.skipped:
+        print(
+            f"excluded {len(track.skipped)} pre-schema day(s) "
+            f"({', '.join(track.skipped)}): imported after the fact, not prospective"
+        )
+    print(
+        f"selection edge (WATCH ROI - all ROI): {track.selection_edge:+.1%}"
+    )
+    if track.selection_edge < 0:
+        print(
+            "  The filter is picking worse than pricing every market, so it is\n"
+            "  destroying value rather than merely failing to add it."
+        )
     return 0
 
 

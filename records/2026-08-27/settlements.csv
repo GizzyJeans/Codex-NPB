@@ -1,0 +1,21 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,official_source
+2026-08-27,Fukuoka SoftBank Hawks,Chiba Lotte Marines,spread,Fukuoka SoftBank Hawks,2+90,4,2,6,PARTIAL_WIN,1000,+855,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Fukuoka SoftBank Hawks,Chiba Lotte Marines,spread,Chiba Lotte Marines,2+90,4,2,6,PARTIAL_LOSS,1000,-900,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Fukuoka SoftBank Hawks,Chiba Lotte Marines,total,over,8平,4,2,6,LOSS,1000,-1000,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Fukuoka SoftBank Hawks,Chiba Lotte Marines,total,under,8平,4,2,6,WIN,1000,+930,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Hanshin Tigers,Chunichi Dragons,spread,Hanshin Tigers,1+90,4,3,7,PARTIAL_WIN,1000,+855,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Hanshin Tigers,Chunichi Dragons,spread,Chunichi Dragons,1+90,4,3,7,PARTIAL_LOSS,1000,-900,0,+0,WATCH,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Hanshin Tigers,Chunichi Dragons,total,over,7+50,4,3,7,PARTIAL_WIN,1000,+465,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Hanshin Tigers,Chunichi Dragons,total,under,7+50,4,3,7,PARTIAL_LOSS,1000,-500,0,+0,WATCH,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yokohama DeNA BayStars,Hiroshima Carp,spread,Yokohama DeNA BayStars,1+60,6,1,7,WIN,1000,+950,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yokohama DeNA BayStars,Hiroshima Carp,spread,Hiroshima Carp,1+60,6,1,7,LOSS,1000,-1000,0,+0,WATCH,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yokohama DeNA BayStars,Hiroshima Carp,total,over,6+25,6,1,7,WIN,1000,+930,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yokohama DeNA BayStars,Hiroshima Carp,total,under,6+25,6,1,7,LOSS,1000,-1000,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Tohoku Rakuten Golden Eagles,Orix Buffaloes,spread,Orix Buffaloes,1+80,12,4,16,LOSS,1000,-1000,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Tohoku Rakuten Golden Eagles,Orix Buffaloes,spread,Tohoku Rakuten Golden Eagles,1+80,12,4,16,WIN,1000,+950,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Tohoku Rakuten Golden Eagles,Orix Buffaloes,total,over,7-50,12,4,16,WIN,1000,+930,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Tohoku Rakuten Golden Eagles,Orix Buffaloes,total,under,7-50,12,4,16,LOSS,1000,-1000,0,+0,WATCH,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yomiuri Giants,Tokyo Yakult Swallows,spread,Yomiuri Giants,1+15,9,2,11,WIN,1000,+950,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yomiuri Giants,Tokyo Yakult Swallows,spread,Tokyo Yakult Swallows,1+15,9,2,11,LOSS,1000,-1000,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yomiuri Giants,Tokyo Yakult Swallows,total,over,8.5,9,2,11,WIN,1000,+930,0,+0,PASS,https://npb.jp/bis/2026/games/gm20260827.html
+2026-08-27,Yomiuri Giants,Tokyo Yakult Swallows,total,under,8.5,9,2,11,LOSS,1000,-1000,0,+0,WATCH,https://npb.jp/bis/2026/games/gm20260827.html
