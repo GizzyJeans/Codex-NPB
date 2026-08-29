@@ -244,7 +244,7 @@ class NPBOfficialClient:
         results = list(_parse_daily_results(document, game_date))
         if results:
             return results
-        return [
+        from_schedule = [
             GameResult(
                 game_date=entry.game_date,
                 away=entry.away,
@@ -259,6 +259,21 @@ class NPBOfficialClient:
             and entry.status == "final"
             and entry.away_score is not None
         ]
+        if from_schedule:
+            return from_schedule
+        return self.live_results(game_date)
+
+    def live_results(self, game_date: date) -> list[GameResult]:
+        """Finished games from the homepage scoreboard.
+
+        Both archive pages can lag a full evening behind, while the strip at
+        the top of npb.jp carries the same scores minutes after the last out.
+        It only ever shows one date, so the date it declares is checked
+        before any of it is used, and only games it marks 試合終了 are read —
+        a game still in progress must never be settled.
+        """
+        document = self.fetch("/")
+        return list(_parse_live_scoreboard(document, game_date))
 
     def schedule_for_month(self, month: int) -> list[ScheduledGame]:
         document = self.fetch(f"/games/{self.year}/schedule_{month:02d}_detail.html")
@@ -405,6 +420,63 @@ def _parse_daily_results(document: str, game_date: date) -> Iterator[GameResult]
             home_score=int(home_text),
             venue=venue,
             game_number=int(match.group("no")),
+        )
+
+
+_LIVE_DATE_RE = re.compile(
+    r'class="score_box date"[^>]*>.*?(?P<year>\d{4}).*?(?P<month>\d{1,2})/(?P<day>\d{1,2})',
+    re.S,
+)
+_LIVE_GAME_RE = re.compile(
+    r'<a href="/scores/(?P<year>\d{4})/(?P<md>\d{4})/(?P<home>[a-z]+)-(?P<away>[a-z]+)-\d+/"'
+    r'(?P<body>.*?)</a>',
+    re.S,
+)
+_LIVE_SCORE_RE = re.compile(r'class="score"[^>]*>(.*?)</div>', re.S)
+_LIVE_STATE_RE = re.compile(r'class="state"[^>]*>(.*?)</div>', re.S)
+_FINAL_SCORE_RE = re.compile(r"^(\d+)\s*-\s*(\d+)$")
+
+
+def _parse_live_scoreboard(document: str, game_date: date) -> Iterator[GameResult]:
+    """Read the homepage strip, which shows a single date's games.
+
+    The score reads home-away, matching the left/right logo order used
+    elsewhere on the site.
+    """
+    header = document[document.find('id="header_score"') :] or document
+    stamp = _LIVE_DATE_RE.search(header)
+    if not stamp:
+        return
+    shown = date(
+        int(stamp.group("year")), int(stamp.group("month")), int(stamp.group("day"))
+    )
+    if shown != game_date:
+        return
+    for match in _LIVE_GAME_RE.finditer(header):
+        body = match.group("body")
+        state = _LIVE_STATE_RE.search(body)
+        if not state or "試合終了" not in _strip_tags(state.group(1)):
+            continue
+        score = _LIVE_SCORE_RE.search(body)
+        if not score:
+            continue
+        final = _FINAL_SCORE_RE.match(_strip_tags(score.group(1)))
+        if not final:
+            continue
+        try:
+            home = resolve(match.group("home"))
+            away = resolve(match.group("away"))
+        except KeyError:
+            continue
+        venue_match = re.search(r"[（(]([^）)]*)[）)]", _strip_tags(state.group(1)))
+        yield GameResult(
+            game_date=game_date,
+            away=away.english,
+            home=home.english,
+            away_score=int(final.group(2)),
+            home_score=int(final.group(1)),
+            venue=venue_match.group(1).replace(" ", "") if venue_match else "",
+            game_number=0,
         )
 
 
