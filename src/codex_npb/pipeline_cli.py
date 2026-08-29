@@ -224,7 +224,6 @@ def settle_main(argv: list[str] | None = None) -> int:
     parser.add_argument("game_date", help="YYYY-MM-DD")
     parser.add_argument("--board", type=Path, required=True)
     parser.add_argument("--slate", type=Path, required=True)
-    parser.add_argument("--bundle", type=Path, default=DEFAULT_BUNDLE)
     parser.add_argument("--records", type=Path, default=Path("records"))
     parser.add_argument("--ledger", type=Path, default=Path("records/ledger.jsonl"))
     parser.add_argument("--shadow-stake", type=float, default=1_000)
@@ -239,22 +238,34 @@ def settle_main(argv: list[str] | None = None) -> int:
 
     target = date.fromisoformat(args.game_date)
     games = read_board(args.board)
-    bundle = load_bundle(args.bundle)
-    calibration = bundle["calibration"]
 
     projections = {}
     for path in sorted(args.slate.glob("*.json")):
         entry = json.loads(path.read_text(encoding="utf-8"))
         projections[(entry["game"]["away"], entry["game"]["home"])] = entry
+    if not projections:
+        print(f"no slate entries under {args.slate}")
+        return 1
+
+    # Settle against the parameters frozen into the slate before first pitch,
+    # never against whatever the bundle holds now. Re-reading the live
+    # calibration would let a later data refresh silently change the EV a
+    # candidate is recorded as having been priced at.
+    frozen = next(iter(projections.values()))["model"]
+    dispersion = frozen["dispersion"]
+    final_draw_share = frozen["final_draw_share"]
 
     client = NPBOfficialClient(target.year, delay_seconds=args.delay)
     results = {(game.away, game.home): game for game in client.results_for(target)}
+    if not results:
+        print(f"npb.jp has no final scores for {target}; nothing settled")
+        return 1
 
     priced = price_board(
         games,
         {key: entry["model"] for key, entry in projections.items()},
-        dispersion=calibration["dispersion"],
-        final_draw_share=calibration["final_draw_share"],
+        dispersion=dispersion,
+        final_draw_share=final_draw_share,
     )
     settled = settle_board(priced, games, results, shadow_stake=args.shadow_stake)
     summary = summarize(settled)
@@ -436,7 +447,6 @@ def daily_main(argv: list[str] | None = None) -> int:
                     day.isoformat(),
                     "--board", str(args.boards / f"{day.isoformat()}.csv"),
                     "--slate", str(slate),
-                    "--bundle", str(args.bundle),
                     "--records", str(args.records),
                     "--delay", str(args.delay),
                     "--write", "--recorded-before-first-pitch",

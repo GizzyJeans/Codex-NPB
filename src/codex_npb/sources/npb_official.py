@@ -232,9 +232,33 @@ class NPBOfficialClient:
     # ---------------------------------------------------------------- games
 
     def results_for(self, game_date: date) -> list[GameResult]:
+        """Final scores for one date.
+
+        The daily page is authoritative but lags: it can still be titled
+        試合予定 hours after the games have finished, in which case it carries
+        no scores at all. The monthly schedule table is updated first, so it
+        is used as a fallback rather than reporting a played date as empty.
+        """
         stamp = game_date.strftime("%Y%m%d")
         document = self.fetch(f"/bis/{self.year}/games/gm{stamp}.html")
-        return list(_parse_daily_results(document, game_date))
+        results = list(_parse_daily_results(document, game_date))
+        if results:
+            return results
+        return [
+            GameResult(
+                game_date=entry.game_date,
+                away=entry.away,
+                home=entry.home,
+                away_score=entry.away_score,
+                home_score=entry.home_score or 0,
+                venue=entry.venue,
+                game_number=0,
+            )
+            for entry in self.schedule_for_month(game_date.month)
+            if entry.game_date == game_date
+            and entry.status == "final"
+            and entry.away_score is not None
+        ]
 
     def schedule_for_month(self, month: int) -> list[ScheduledGame]:
         document = self.fetch(f"/games/{self.year}/schedule_{month:02d}_detail.html")
