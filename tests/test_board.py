@@ -149,3 +149,56 @@ class PriceGameTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UnreadableHandicapTests(unittest.TestCase):
+    """A tail the platform writes ambiguously must not be guessed at."""
+
+    def board(self, handicap):
+        return write(
+            HEADER
+            + f"2026-08-30,讀賣巨人,阪神虎,home,{handicap},0.950,5-50,0.930\n"
+        )
+
+    def test_single_digit_tail_is_rejected_outright(self):
+        # "1+5" could be 5% or 50%; those are different lines.
+        keep, path = self.board("1+5")
+        with self.assertRaises(Exception):
+            read_board(path)
+        keep.cleanup()
+
+    def test_blank_handicap_is_accepted_and_marked_unpriceable(self):
+        keep, path = self.board("")
+        game = read_board(path)[0]
+        self.assertFalse(game.handicap_priceable)
+        self.assertFalse(game.is_level)
+        keep.cleanup()
+
+    def test_totals_still_price_when_the_handicap_cannot_be_read(self):
+        keep, path = self.board("")
+        game = read_board(path)[0]
+        keep.cleanup()
+        priced = price_game(
+            game,
+            away_mu=2.7,
+            home_mu=2.7,
+            dispersion=2.9,
+            final_draw_share=0.15,
+            eligibility=CONFIRMED,
+        )
+        self.assertEqual({m.market for m in priced}, {"total"})
+        self.assertEqual(len(priced), 2)
+
+    def test_a_readable_handicap_still_prices_all_four(self):
+        keep, path = self.board("1+50")
+        game = read_board(path)[0]
+        keep.cleanup()
+        priced = price_game(
+            game,
+            away_mu=2.7,
+            home_mu=2.7,
+            dispersion=2.9,
+            final_draw_share=0.15,
+            eligibility=CONFIRMED,
+        )
+        self.assertEqual(len(priced), 4)

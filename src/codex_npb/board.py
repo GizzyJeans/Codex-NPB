@@ -61,11 +61,23 @@ class BoardGame:
     total_odds: float
 
     @property
+    def handicap_priceable(self) -> bool:
+        """False when the board's handicap could not be read unambiguously.
+
+        A single-digit tail such as ``1+5`` may mean 5% or 50% depending on
+        the platform's shorthand, and guessing swaps a near-pick-em for a
+        half-ball line. The rest of the row still prices.
+        """
+        return bool(self.handicap.strip())
+
+    @property
     def underdog(self) -> str:
         return self.home if self.favorite == self.away else self.away
 
     @property
     def is_level(self) -> bool:
+        if not self.handicap_priceable:
+            return False
         parsed = parse_tail_line(self.handicap)
         return parsed.base == 0 and parsed.sign == "flat"
 
@@ -120,7 +132,9 @@ def read_board(path: Path | str) -> list[BoardGame]:
         side = row["hcap_side"].strip().lower()
         if side not in {"away", "home"}:
             raise BoardError(f"line {index}: hcap_side must be away or home")
-        parse_tail_line(row["hcap"])
+        handicap = row["hcap"].strip()
+        if handicap:
+            parse_tail_line(handicap)
         parse_tail_line(row["total"])
         games.append(
             BoardGame(
@@ -128,7 +142,7 @@ def read_board(path: Path | str) -> list[BoardGame]:
                 away=away,
                 home=home,
                 favorite=away if side == "away" else home,
-                handicap=row["hcap"].strip(),
+                handicap=handicap,
                 handicap_odds=float(row["hcap_odds"]),
                 total_line=row["total"].strip(),
                 total_odds=float(row["total_odds"]),
@@ -176,7 +190,6 @@ def price_game(
     underdog_mu = home_mu if game.favorite == game.away else away_mu
     model_margin = favorite_mu - underdog_mu
     model_total = away_mu + home_mu
-    handicap_line = _effective_line(game.handicap)
     total_line = _effective_line(game.total_line)
 
     priced: list[PricedMarket] = []
@@ -219,7 +232,10 @@ def price_game(
             )
         )
 
-    for selection in (game.favorite, game.underdog):
+    handicap_line = (
+        _effective_line(game.handicap) if game.handicap_priceable else 0.0
+    )
+    for selection in (game.favorite, game.underdog) if game.handicap_priceable else ():
         add(
             SpreadMarket(
                 away_team=game.away,
