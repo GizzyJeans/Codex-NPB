@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from .ledger import append as ledger_append
 from .track_record import collect
 from .settlement import (
     OFFICIAL_SOURCE,
+    first_pitch_utc,
     settle_board,
     summarize,
     write_candidates,
@@ -231,7 +233,13 @@ def settle_main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--recorded-before-first-pitch",
         action="store_true",
-        help="mark the ledger entry as a genuine prospective record",
+        help="claim the day as prospective; each game is still checked individually",
+    )
+    parser.add_argument(
+        "--priced-at",
+        type=datetime.fromisoformat,
+        default=None,
+        help="when the board was priced (UTC); defaults to its git commit time",
     )
     parser.add_argument("--write", action="store_true", help="write records to disk")
     args = parser.parse_args(argv)
@@ -267,8 +275,28 @@ def settle_main(argv: list[str] | None = None) -> int:
         dispersion=dispersion,
         final_draw_share=final_draw_share,
     )
-    settled = settle_board(priced, games, results, shadow_stake=args.shadow_stake)
+    # The board's own commit is the authority on when the day was priced;
+    # the record's integrity rests on version control, not on a claim.
+    priced_at = args.priced_at or _board_commit_time(args.board)
+    first_pitch = {
+        key: first_pitch_utc(target, entry["game"].get("start_time", ""))
+        for key, entry in projections.items()
+    }
+    settled = settle_board(
+        priced,
+        games,
+        results,
+        shadow_stake=args.shadow_stake,
+        first_pitch=first_pitch,
+        priced_at=priced_at,
+    )
     summary = summarize(settled)
+    late = [row for row in settled if not row.prospective]
+    if late:
+        names = sorted({f"{row.market.away} @ {row.market.home}" for row in late})
+        print(f"priced at {priced_at:%Y-%m-%d %H:%M UTC}" if priced_at else "no price time")
+        print(f"NOT prospective ({len(late)} markets): {'; '.join(names)}")
+        print()
 
     print(f"{target}: settled {summary.graded} markets over {len(games)} games\n")
     print(f"{'game':<32}{'market':<8}{'selection':<24}{'line':>6}{'EV':>8}{'result':>14}{'shadow':>9}")
@@ -318,6 +346,8 @@ def settle_main(argv: list[str] | None = None) -> int:
             "recorded_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "model_version": "npb-pipeline-v0.2",
             "markets_graded": summary.graded,
+            "markets_prospective": summary.prospective,
+            "priced_at_utc": priced_at.strftime("%Y-%m-%dT%H:%M:%SZ") if priced_at else None,
             "formal_bets": summary.formal,
             "watch_candidates": summary.watch,
             "watch_record": f"{summary.watch_wins}-{summary.watch_losses}",
@@ -327,13 +357,20 @@ def settle_main(argv: list[str] | None = None) -> int:
             "all_shadow_pnl": summary.all_shadow_pnl,
             "actual_stake": summary.actual_stake,
             "actual_pnl": summary.actual_pnl,
-            "prospective_eligible": bool(args.recorded_before_first_pitch),
+            # Claiming the day is not enough: every market must also have
+            # been priced before its own game started.
+            "prospective_eligible": bool(args.recorded_before_first_pitch)
+            and summary.prospective == summary.graded,
             "source": source,
             "notes": (
                 "Board and projections committed before first pitch; "
                 "classifications preserved as priced."
                 if args.recorded_before_first_pitch
-                else "Settled after the fact; not a prospective record."
+                and summary.prospective == summary.graded
+                else (
+                    f"{summary.graded - summary.prospective} of {summary.graded} "
+                    "markets were priced after their own first pitch."
+                )
             ),
         },
     )
@@ -393,6 +430,23 @@ def record_main(argv: list[str] | None = None) -> int:
 def _jst_today() -> date:
     """The current date in Japan, which is the date NPB games are keyed by."""
     return (datetime.now(timezone.utc) + timedelta(hours=9)).date()
+
+
+def _board_commit_time(board: Path) -> datetime | None:
+    """When the board file was committed, read from git."""
+    try:
+        stamp = subprocess.run(
+            ["git", "log", "-1", "--format=%cI", "--", str(board)],
+            capture_output=True, text=True, timeout=20, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if not stamp:
+        return None
+    try:
+        return datetime.fromisoformat(stamp).astimezone(timezone.utc)
+    except ValueError:
+        return None
 
 
 def _pending_settlements(boards: Path, records: Path, before: date) -> list[date]:

@@ -1,5 +1,6 @@
 import unittest
 from dataclasses import dataclass
+from datetime import date, datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -161,3 +162,74 @@ class WriteRecordsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProspectiveTests(unittest.TestCase):
+    """A slate is priced once, but its games do not all start together."""
+
+    def settled(self, priced_at, start="18:00"):
+        from codex_npb.settlement import first_pitch_utc
+
+        return settle_board(
+            [priced("total", "under", "6-50", 0.93)],
+            [GAME],
+            {(GAME.away, GAME.home): FakeResult(2, 3)},
+            first_pitch={(GAME.away, GAME.home): first_pitch_utc(date(2026, 8, 30), start)},
+            priced_at=priced_at,
+        )
+
+    def test_priced_before_first_pitch_is_prospective(self):
+        rows = self.settled(datetime(2026, 8, 30, 8, 59, tzinfo=timezone.utc))
+        self.assertTrue(rows[0].prospective)
+
+    def test_priced_after_first_pitch_is_not(self):
+        rows = self.settled(datetime(2026, 8, 30, 9, 1, tzinfo=timezone.utc))
+        self.assertFalse(rows[0].prospective)
+
+    def test_an_early_game_can_be_late_while_the_slate_was_early(self):
+        # Board committed 04:48 UTC: fine for an 18:00 JST game, too late
+        # for one starting 13:00 JST (04:00 UTC).
+        priced_at = datetime(2026, 8, 30, 4, 48, tzinfo=timezone.utc)
+        self.assertFalse(self.settled(priced_at, start="13:00")[0].prospective)
+        self.assertTrue(self.settled(priced_at, start="18:00")[0].prospective)
+
+    def test_unknown_price_time_defaults_to_prospective(self):
+        rows = settle_board(
+            [priced("total", "under", "6-50", 0.93)],
+            [GAME],
+            {(GAME.away, GAME.home): FakeResult(2, 3)},
+        )
+        self.assertTrue(rows[0].prospective)
+
+    def test_summary_counts_prospective_markets(self):
+        from codex_npb.settlement import first_pitch_utc
+
+        rows = settle_board(
+            [
+                priced("total", "under", "6-50", 0.93),
+                priced("total", "over", "6-50", 0.93),
+            ],
+            [GAME],
+            {(GAME.away, GAME.home): FakeResult(2, 3)},
+            first_pitch={(GAME.away, GAME.home): first_pitch_utc(date(2026, 8, 30), "13:00")},
+            priced_at=datetime(2026, 8, 30, 4, 48, tzinfo=timezone.utc),
+        )
+        summary = summarize(rows)
+        self.assertEqual(summary.graded, 2)
+        self.assertEqual(summary.prospective, 0)
+
+
+class FirstPitchTests(unittest.TestCase):
+    def test_jst_converts_to_utc(self):
+        from codex_npb.settlement import first_pitch_utc
+
+        self.assertEqual(
+            first_pitch_utc(date(2026, 8, 30), "13:00"),
+            datetime(2026, 8, 30, 4, 0, tzinfo=timezone.utc),
+        )
+
+    def test_missing_or_malformed_time_returns_none(self):
+        from codex_npb.settlement import first_pitch_utc
+
+        for value in ("", "TBD", "25:00", "18"):
+            self.assertIsNone(first_pitch_utc(date(2026, 8, 30), value))

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
+from datetime import date as _date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
@@ -21,6 +22,22 @@ from .board import BoardGame, PricedMarket
 from .model import SpreadMarket, TotalMarket
 
 OFFICIAL_SOURCE = "https://npb.jp/bis/{year}/games/gm{stamp}.html"
+JST = timezone(timedelta(hours=9))
+
+
+def first_pitch_utc(game_date: _date, start_time_jst: str) -> datetime | None:
+    """When a game starts, in UTC. None when the slate carried no time."""
+    if not start_time_jst or ":" not in start_time_jst:
+        return None
+    hour, _, minute = start_time_jst.partition(":")
+    try:
+        local = datetime(
+            game_date.year, game_date.month, game_date.day,
+            int(hour), int(minute), tzinfo=JST,
+        )
+    except ValueError:
+        return None
+    return local.astimezone(timezone.utc)
 
 
 class SettlementError(ValueError):
@@ -36,6 +53,7 @@ class SettledMarket:
     profit_per_unit: float
     shadow_stake: float
     actual_stake: float = 0.0
+    prospective: bool = True
 
     @property
     def shadow_pnl(self) -> float:
@@ -59,11 +77,19 @@ def settle_board(
     *,
     shadow_stake: float = 1_000,
     actual_stakes: Mapping[tuple[str, str, str, str], float] | None = None,
+    first_pitch: Mapping[tuple[str, str], datetime | None] | None = None,
+    priced_at: datetime | None = None,
 ) -> list[SettledMarket]:
     """Grade every priced market against the official score.
 
     ``actual_stakes`` is keyed by (away, home, market, selection) and defaults
     to nothing staked, which is what an unbet WATCH candidate must record.
+
+    ``priced_at`` and ``first_pitch`` decide, per game, whether a market was
+    priced before its own first pitch. A slate is prepared once but the games
+    on it do not all start together: a 13:00 JST game can be under way while
+    the 18:00 ones are hours off. Marking the whole day prospective because
+    most of it was would overstate the record.
     """
     favorites = {(game.away, game.home): game.favorite for game in games}
     actual_stakes = actual_stakes or {}
@@ -93,6 +119,10 @@ def settle_board(
             raise SettlementError(f"unknown market kind {entry.market!r}")
 
         outcome = market.settle(result.away_score, result.home_score)
+        start = (first_pitch or {}).get(key)
+        prospective = (
+            True if priced_at is None or start is None else priced_at < start
+        )
         settled.append(
             SettledMarket(
                 market=entry,
@@ -104,6 +134,7 @@ def settle_board(
                 actual_stake=actual_stakes.get(
                     (entry.away, entry.home, entry.market, entry.selection), 0.0
                 ),
+                prospective=prospective,
             )
         )
     return settled
@@ -112,6 +143,7 @@ def settle_board(
 @dataclass(frozen=True)
 class SettlementSummary:
     graded: int
+    prospective: int
     watch: int
     formal: int
     watch_wins: int
@@ -137,6 +169,7 @@ def summarize(settled: Sequence[SettledMarket]) -> SettlementSummary:
     formal = [row for row in settled if row.market.status == "FORMAL"]
     return SettlementSummary(
         graded=len(settled),
+        prospective=sum(1 for row in settled if row.prospective),
         watch=len(watch),
         formal=len(formal),
         watch_wins=sum(1 for row in watch if row.shadow_pnl > 0),
@@ -160,7 +193,7 @@ def write_candidates(settled: Sequence[SettledMarket], path: Path) -> Path:
             "effective_model_probability", "market_no_vig_probability",
             "fair_decimal_odds", "ev", "minimum_decimal_odds",
             "model_expectation", "line_expectation", "expectation_gap",
-            "class_at_analysis", "actual_stake",
+            "class_at_analysis", "actual_stake", "prospective",
         ])
         for row in settled:
             entry = row.market
@@ -174,6 +207,7 @@ def write_candidates(settled: Sequence[SettledMarket], path: Path) -> Path:
                 f"{entry.model_expectation:.3f}", f"{entry.line_expectation:.3f}",
                 f"{entry.expectation_gap:+.3f}",
                 entry.status, f"{row.actual_stake:.0f}",
+                "true" if row.prospective else "false",
             ])
     return path
 
@@ -188,7 +222,7 @@ def write_settlements(
             "date", "away", "home", "market", "selection", "line",
             "away_score", "home_score", "total_runs", "result",
             "shadow_stake", "shadow_pnl", "actual_stake", "actual_pnl",
-            "class_at_analysis", "official_source",
+            "class_at_analysis", "prospective", "official_source",
         ])
         for row in settled:
             entry = row.market
@@ -197,7 +231,8 @@ def write_settlements(
                 entry.line, row.away_score, row.home_score, row.total_runs, row.result,
                 f"{row.shadow_stake:.0f}", f"{row.shadow_pnl:+.0f}",
                 f"{row.actual_stake:.0f}", f"{row.actual_pnl:+.0f}",
-                entry.status, official_source,
+                entry.status, "true" if row.prospective else "false",
+                official_source,
             ])
     return path
 

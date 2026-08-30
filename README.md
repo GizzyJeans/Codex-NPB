@@ -203,6 +203,8 @@ date,away,home,hcap_side,hcap,hcap_odds,total,total_odds
 
 `hcap_side` 指讓球數字印在哪一列，也就是讓球方。
 
+**尾數無法確定時，把 `hcap` 留空。** 該場的讓球會被跳過、大小照常定價。`1+5` 這類單碼尾數仍會被 `parse_tail_line` 直接拒絕——5% 與 50% 是不同盤口，在讓 1 分的基礎上是「幾乎平手」與「讓半球」的差別。程式不會替留空的尾數推測任何值，必須是人為刻意留白。
+
 ```powershell
 codex-npb-board boards/2026-08-26.csv --slate slates/2026-08-26 --min-ev 0.04
 ```
@@ -261,7 +263,18 @@ codex-npb-settle 2026-08-26 --board boards/2026-08-26.csv --slate slates/2026-08
 
 不加 `--write` 只做試算。`settlement.py` 用開賽前既有的盤口、EV 與分類結算，**不重算投影、不重新分類**：賽前是 `WATCH` 的候選賽後仍是 `WATCH`。影子損益與實際損益分開兩欄，未實際下注時實際損益恆為 0。
 
-`--recorded-before-first-pitch` 才會把 ledger 的 `prospective_eligible` 標為 `true`，且應僅在盤面確實於開賽前提交時使用。
+### 前瞻資格是逐場判定的
+
+同一份 slate 只定價一次，但當日各場開賽時間不同：13:00 JST 的比賽可能已經開打，18:00 JST 的還有數小時。因此 `prospective` 是**每場各自判定**，不是整天一個旗標。
+
+- 定價時間取自**盤面檔案的 git commit 時間**（`git log -1 --format=%cI -- boards/<date>.csv`）。紀錄的可信度建立在版控上，不是宣稱上。
+- 每場比較該 commit 時間與**該場自己的**開賽時間（JST 轉 UTC）。
+- `settlements.csv` 與 `candidates.csv` 各有一欄 `prospective`。
+- ledger 的 `prospective_eligible` 只有在**所有**市場都及時定價時才為 `true`；否則備註會寫明幾個市場逾時。
+
+`--recorded-before-first-pitch` 只是「宣稱」，仍須通過上述逐場檢查。`--priced-at` 可覆寫時間來源。
+
+2026-08-30 是第一個部分逾時的例子：盤面於 04:48:38 UTC 提交，羅德@火腿 13:00 JST（04:00 UTC）已開打 48 分鐘，其餘五場（05:00／08:00／09:00 UTC）及時。該日 ledger 不會標為 `prospective_eligible`。
 
 ### 累計戰績
 
