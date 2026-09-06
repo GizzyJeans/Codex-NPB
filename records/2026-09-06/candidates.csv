@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-09-06,Yokohama DeNA BayStars,Hanshin Tigers,spread,Hanshin Tigers,1+10,0.950,0.4995,0.5000,2.002,-0.0219,2.097,0.834,0.950,-0.116,PASS,0,true
+2026-09-06,Yokohama DeNA BayStars,Hanshin Tigers,spread,Yokohama DeNA BayStars,1+10,0.950,0.5005,0.5000,1.998,-0.0203,2.093,0.834,0.950,-0.116,PASS,0,true
+2026-09-06,Yokohama DeNA BayStars,Hanshin Tigers,total,over,6.5,0.930,0.5046,0.5000,1.982,-0.0261,2.061,6.925,6.500,+0.425,PASS,0,true
+2026-09-06,Yokohama DeNA BayStars,Hanshin Tigers,total,under,6.5,0.930,0.4954,0.5000,2.019,-0.0439,2.099,6.925,6.500,+0.425,PASS,0,true
+2026-09-06,Yomiuri Giants,Hiroshima Carp,spread,Yomiuri Giants,0-20,0.950,0.5651,0.5000,1.770,0.1001,1.842,0.551,0.100,+0.451,WATCH,0,true
+2026-09-06,Yomiuri Giants,Hiroshima Carp,spread,Hiroshima Carp,0-20,0.950,0.4349,0.5000,2.299,-0.1492,2.393,0.551,0.100,+0.451,PASS,0,true
+2026-09-06,Yomiuri Giants,Hiroshima Carp,total,over,6+75,0.930,0.4696,0.5000,2.130,-0.0916,2.217,5.849,5.625,+0.224,PASS,0,true
+2026-09-06,Yomiuri Giants,Hiroshima Carp,total,under,6+75,0.930,0.5304,0.5000,1.885,0.0232,1.962,5.849,5.625,+0.224,PASS,0,true
