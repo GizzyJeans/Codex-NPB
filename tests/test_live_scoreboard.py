@@ -73,3 +73,59 @@ class LiveScoreboardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CancellationTests(unittest.TestCase):
+    """A called-off game must be distinguishable from one not yet finished."""
+
+    PAGE = PAGE.replace(
+        '<div class="state">（マツダ）　7回表</div>',
+        '<div class="state">（マツダ）　中止</div>',
+    ) if False else """
+<div id="header_score"><div class="score_wrap">
+<div class="score_box date"><div>2026<br>9/8 Tue.</div></div>
+<div class="score_box"><a href="/scores/2026/0908/t-c-19/"><div>
+  <img alt="阪神タイガース" class="logo_left">
+  <img alt="広島東洋カープ" class="logo_right">
+  <div class="score">*-*</div>
+  <div class="state">（甲子園）　中止</div>
+</div></a></div>
+<div class="score_box"><a href="/scores/2026/0908/g-d-21/"><div>
+  <img alt="読売ジャイアンツ" class="logo_left">
+  <img alt="中日ドラゴンズ" class="logo_right">
+  <div class="score">0-3</div>
+  <div class="state">（東京ドーム）　試合終了</div>
+</div></a></div>
+<div class="score_box"><a href="/scores/2026/0908/db-s-20/"><div>
+  <img alt="横浜DeNAベイスターズ" class="logo_left">
+  <img alt="東京ヤクルトスワローズ" class="logo_right">
+  <div class="score">1-3</div>
+  <div class="state">（横浜）　5回裏</div>
+</div></a></div>
+</div></div>
+"""
+
+    def test_cancelled_game_is_reported(self):
+        from codex_npb.sources.npb_official import _parse_live_cancellations
+
+        self.assertEqual(
+            set(_parse_live_cancellations(self.PAGE, date(2026, 9, 8))),
+            {("Hiroshima Carp", "Hanshin Tigers")},
+        )
+
+    def test_finished_and_in_progress_games_are_not_cancellations(self):
+        from codex_npb.sources.npb_official import _parse_live_cancellations
+
+        cancelled = set(_parse_live_cancellations(self.PAGE, date(2026, 9, 8)))
+        self.assertNotIn(("Chunichi Dragons", "Yomiuri Giants"), cancelled)
+        self.assertNotIn(("Tokyo Yakult Swallows", "Yokohama DeNA BayStars"), cancelled)
+
+    def test_a_cancelled_game_yields_no_result(self):
+        homes = {g.home for g in _parse_live_scoreboard(self.PAGE, date(2026, 9, 8))}
+        self.assertNotIn("Hanshin Tigers", homes)
+        self.assertIn("Yomiuri Giants", homes)
+
+    def test_wrong_date_reports_no_cancellations(self):
+        from codex_npb.sources.npb_official import _parse_live_cancellations
+
+        self.assertEqual(list(_parse_live_cancellations(self.PAGE, date(2026, 9, 9))), [])

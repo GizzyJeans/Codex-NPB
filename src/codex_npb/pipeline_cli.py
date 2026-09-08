@@ -265,7 +265,8 @@ def settle_main(argv: list[str] | None = None) -> int:
 
     client = NPBOfficialClient(target.year, delay_seconds=args.delay)
     results = {(game.away, game.home): game for game in client.results_for(target)}
-    if not results:
+    cancelled = client.cancelled_games(target)
+    if not results and not cancelled:
         print(f"npb.jp has no final scores for {target}; nothing settled")
         return 1
 
@@ -289,8 +290,14 @@ def settle_main(argv: list[str] | None = None) -> int:
         shadow_stake=args.shadow_stake,
         first_pitch=first_pitch,
         priced_at=priced_at,
+        cancelled=cancelled,
     )
     summary = summarize(settled)
+    if summary.voided:
+        names = sorted({f"{row.market.away} @ {row.market.home}"
+                        for row in settled if row.result == "VOID"})
+        print(f"VOID ({summary.voided} markets, game called off): {'; '.join(names)}")
+        print()
     late = [row for row in settled if not row.prospective]
     if late:
         names = sorted({f"{row.market.away} @ {row.market.home}" for row in late})
@@ -346,6 +353,7 @@ def settle_main(argv: list[str] | None = None) -> int:
             "recorded_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "model_version": "npb-pipeline-v0.2",
             "markets_graded": summary.graded,
+            "markets_voided": summary.voided,
             "markets_prospective": summary.prospective,
             "priced_at_utc": priced_at.strftime("%Y-%m-%dT%H:%M:%SZ") if priced_at else None,
             "formal_bets": summary.formal,

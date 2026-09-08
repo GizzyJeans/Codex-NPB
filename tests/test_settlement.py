@@ -233,3 +233,66 @@ class FirstPitchTests(unittest.TestCase):
 
         for value in ("", "TBD", "25:00", "18"):
             self.assertIsNone(first_pitch_utc(date(2026, 8, 30), value))
+
+
+class CancelledGameTests(unittest.TestCase):
+    """A rained-out game has no result and never will; it must not block the day."""
+
+    def markets(self):
+        return [
+            priced("spread", "Hiroshima Carp", "1-50", 0.95, status="WATCH"),
+            priced("total", "under", "6-50", 0.93, status="PASS", ev=-0.1),
+        ]
+
+    def test_missing_result_still_raises_when_not_cancelled(self):
+        with self.assertRaises(SettlementError):
+            settle_board(self.markets(), [GAME], {})
+
+    def test_cancelled_game_is_voided_rather_than_graded(self):
+        rows = settle_board(
+            self.markets(), [GAME], {}, cancelled=[(GAME.away, GAME.home)]
+        )
+        self.assertEqual({row.result for row in rows}, {"VOID"})
+        self.assertEqual([row.shadow_pnl for row in rows], [0.0, 0.0])
+
+    def test_void_is_excluded_from_the_watch_record(self):
+        rows = settle_board(
+            self.markets(), [GAME], {}, cancelled=[(GAME.away, GAME.home)]
+        )
+        summary = summarize(rows)
+        self.assertEqual(summary.voided, 2)
+        self.assertEqual(summary.watch, 0)
+        self.assertEqual((summary.watch_wins, summary.watch_losses), (0, 0))
+        self.assertEqual(summary.watch_shadow_stake, 0.0)
+
+    def test_void_is_excluded_from_the_all_markets_denominator(self):
+        # A voided stake is returned, so counting it would dilute the vig
+        # baseline the WATCH figure is read against.
+        rows = settle_board(
+            self.markets(), [GAME], {}, cancelled=[(GAME.away, GAME.home)]
+        )
+        self.assertEqual(summarize(rows).all_shadow_stake, 0.0)
+
+    def test_other_games_settle_normally_alongside_a_cancellation(self):
+        other = BoardGame(
+            game_date="2026-09-08", away="Chunichi Dragons", home="Yomiuri Giants",
+            favorite="Yomiuri Giants", handicap="1+10", handicap_odds=0.95,
+            total_line="6", total_odds=0.93,
+        )
+        played = PricedMarket(
+            game_date="2026-09-08", away=other.away, home=other.home, market="total",
+            selection="under", line="6", hong_kong_odds=0.93, model_probability=0.55,
+            expected_value=0.1, fair_decimal_odds=1.8, minimum_decimal_odds=1.9,
+            status="WATCH", recommended_stake=0.0, outcome_probabilities={},
+            model_expectation=6.2, line_expectation=6.0,
+        )
+        rows = settle_board(
+            self.markets() + [played],
+            [GAME, other],
+            {(other.away, other.home): FakeResult(0, 3)},
+            cancelled=[(GAME.away, GAME.home)],
+        )
+        summary = summarize(rows)
+        self.assertEqual(summary.voided, 2)
+        self.assertEqual(summary.watch, 1)
+        self.assertEqual(summary.watch_wins, 1)

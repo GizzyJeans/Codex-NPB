@@ -91,14 +91,19 @@ def read_day(path: Path) -> DayRecord | None:
     ledger, so folding them into a forward-looking track record would be
     exactly the retro-fitting this project is built to avoid.
     """
-    rows = list(csv.DictReader(path.read_text(encoding="utf-8").splitlines()))
-    if not rows:
+    all_rows = list(csv.DictReader(path.read_text(encoding="utf-8").splitlines()))
+    if not all_rows:
         raise ValueError(f"{path} has no settled markets")
-    if not REQUIRED_COLUMNS.issubset(rows[0]):
+    if not REQUIRED_COLUMNS.issubset(all_rows[0]):
         return None
+    # A voided market returns its stake, so counting it would inflate every
+    # denominator and drag both ROIs toward zero.
+    rows = [row for row in all_rows if row.get("result") != "VOID"]
     watch = [row for row in rows if row["class_at_analysis"] == "WATCH"]
     return DayRecord(
-        game_date=rows[0]["date"],
+        # Read the date from the unfiltered rows: a whole slate can be
+        # rained out, leaving nothing after the void filter.
+        game_date=all_rows[0]["date"],
         watch_markets=len(watch),
         watch_wins=sum(1 for row in watch if float(row["shadow_pnl"]) > 0),
         watch_losses=sum(1 for row in watch if float(row["shadow_pnl"]) < 0),

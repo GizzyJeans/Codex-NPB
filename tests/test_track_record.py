@@ -98,3 +98,33 @@ class CollectTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VoidedMarketTests(unittest.TestCase):
+    """A called-off game returns the stake and must leave no trace in the ROI."""
+
+    def void_row(self, status):
+        return (
+            f"2026-09-08,A,B,total,over,7,0,0,0,VOID,1000,+0,0,+0,{status},"
+            "https://npb.jp/\n"
+        )
+
+    def test_voids_are_excluded_from_both_denominators(self):
+        with TemporaryDirectory() as directory:
+            make(
+                directory,
+                "2026-09-08",
+                HEADER + row(930, "WATCH") + self.void_row("WATCH") + self.void_row("PASS"),
+            )
+            day = read_day(Path(directory) / "2026-09-08" / "settlements.csv")
+        self.assertEqual(day.watch_markets, 1)
+        self.assertEqual(day.watch_stake, 1000.0)
+        self.assertEqual(day.all_markets, 1)
+        self.assertAlmostEqual(day.watch_roi, 0.93, places=6)
+
+    def test_a_fully_cancelled_day_yields_no_stake(self):
+        with TemporaryDirectory() as directory:
+            make(directory, "2026-09-08", HEADER + self.void_row("WATCH"))
+            day = read_day(Path(directory) / "2026-09-08" / "settlements.csv")
+        self.assertEqual(day.watch_stake, 0.0)
+        self.assertEqual(day.watch_roi, 0.0)

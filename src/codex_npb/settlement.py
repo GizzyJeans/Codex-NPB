@@ -79,11 +79,17 @@ def settle_board(
     actual_stakes: Mapping[tuple[str, str, str, str], float] | None = None,
     first_pitch: Mapping[tuple[str, str], datetime | None] | None = None,
     priced_at: datetime | None = None,
+    cancelled: Iterable[tuple[str, str]] | None = None,
 ) -> list[SettledMarket]:
     """Grade every priced market against the official score.
 
     ``actual_stakes`` is keyed by (away, home, market, selection) and defaults
     to nothing staked, which is what an unbet WATCH candidate must record.
+
+    ``cancelled`` names games that were called off. A rained-out game never
+    produces a result and is not rescheduled as the same fixture, so its
+    markets are voided: stake returned, no profit or loss, and excluded
+    from the win-loss record rather than counted as either.
 
     ``priced_at`` and ``first_pitch`` decide, per game, whether a market was
     priced before its own first pitch. A slate is prepared once but the games
@@ -93,11 +99,31 @@ def settle_board(
     """
     favorites = {(game.away, game.home): game.favorite for game in games}
     actual_stakes = actual_stakes or {}
+    cancelled_games = set(cancelled or ())
     settled: list[SettledMarket] = []
 
     for entry in priced:
         key = (entry.away, entry.home)
         result = results.get(key)
+        if result is None and key in cancelled_games:
+            start = (first_pitch or {}).get(key)
+            settled.append(
+                SettledMarket(
+                    market=entry,
+                    away_score=0,
+                    home_score=0,
+                    result="VOID",
+                    profit_per_unit=0.0,
+                    shadow_stake=shadow_stake,
+                    actual_stake=actual_stakes.get(
+                        (entry.away, entry.home, entry.market, entry.selection), 0.0
+                    ),
+                    prospective=(
+                        True if priced_at is None or start is None else priced_at < start
+                    ),
+                )
+            )
+            continue
         if result is None:
             raise SettlementError(f"no official result for {entry.away} @ {entry.home}")
         if entry.market == "spread":
@@ -143,6 +169,7 @@ def settle_board(
 @dataclass(frozen=True)
 class SettlementSummary:
     graded: int
+    voided: int
     prospective: int
     watch: int
     formal: int
@@ -165,10 +192,17 @@ class SettlementSummary:
 
 
 def summarize(settled: Sequence[SettledMarket]) -> SettlementSummary:
-    watch = [row for row in settled if row.market.status == "WATCH"]
+    # A void contributes no stake and no result, so it is dropped from the
+    # WATCH accounting entirely rather than diluting the ROI denominator.
+    watch = [
+        row
+        for row in settled
+        if row.market.status == "WATCH" and row.result != "VOID"
+    ]
     formal = [row for row in settled if row.market.status == "FORMAL"]
     return SettlementSummary(
         graded=len(settled),
+        voided=sum(1 for row in settled if row.result == "VOID"),
         prospective=sum(1 for row in settled if row.prospective),
         watch=len(watch),
         formal=len(formal),
@@ -176,7 +210,9 @@ def summarize(settled: Sequence[SettledMarket]) -> SettlementSummary:
         watch_losses=sum(1 for row in watch if row.shadow_pnl < 0),
         watch_shadow_stake=sum(row.shadow_stake for row in watch),
         watch_shadow_pnl=sum(row.shadow_pnl for row in watch),
-        all_shadow_stake=sum(row.shadow_stake for row in settled),
+        all_shadow_stake=sum(
+            row.shadow_stake for row in settled if row.result != "VOID"
+        ),
         all_shadow_pnl=sum(row.shadow_pnl for row in settled),
         actual_stake=sum(row.actual_stake for row in settled),
         actual_pnl=sum(row.actual_pnl for row in settled),

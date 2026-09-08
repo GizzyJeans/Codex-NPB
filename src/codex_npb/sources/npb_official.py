@@ -263,6 +263,17 @@ class NPBOfficialClient:
             return from_schedule
         return self.live_results(game_date)
 
+    def cancelled_games(self, game_date: date) -> set[tuple[str, str]]:
+        """Matchups the scoreboard marks 中止 for this date, as (away, home).
+
+        A rained-off game never produces a result, so settlement has to be
+        able to tell it apart from one that simply has not finished yet.
+        The archive pages lag by hours and do not mark cancellations
+        promptly; the homepage strip does.
+        """
+        document = self.fetch("/")
+        return set(_parse_live_cancellations(document, game_date))
+
     def live_results(self, game_date: date) -> list[GameResult]:
         """Finished games from the homepage scoreboard.
 
@@ -478,6 +489,35 @@ def _parse_live_scoreboard(document: str, game_date: date) -> Iterator[GameResul
             venue=venue_match.group(1).replace(" ", "") if venue_match else "",
             game_number=0,
         )
+
+
+def _live_boxes(document: str, game_date: date) -> Iterator[tuple[str, str, str]]:
+    """Yield (away, home, state_text) for the one date the strip shows."""
+    header = document[document.find('id="header_score"') :] or document
+    stamp = _LIVE_DATE_RE.search(header)
+    if not stamp:
+        return
+    shown = date(
+        int(stamp.group("year")), int(stamp.group("month")), int(stamp.group("day"))
+    )
+    if shown != game_date:
+        return
+    for match in _LIVE_GAME_RE.finditer(header):
+        state = _LIVE_STATE_RE.search(match.group("body"))
+        if not state:
+            continue
+        try:
+            home = resolve(match.group("home"))
+            away = resolve(match.group("away"))
+        except KeyError:
+            continue
+        yield away.english, home.english, _strip_tags(state.group(1))
+
+
+def _parse_live_cancellations(document: str, game_date: date) -> Iterator[tuple[str, str]]:
+    for away, home, state in _live_boxes(document, game_date):
+        if "中止" in state:
+            yield away, home
 
 
 _SCHEDULE_ROW_RE = re.compile(
