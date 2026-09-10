@@ -10,7 +10,19 @@ build/
 .env.*
 !.env.example
 
-# Fetched data snapshots and generated slates: refresh these per analysis,
-# never treat a committed copy as current.
+# Fetched season snapshot: refresh per analysis, never treat a committed copy
+# as current.
 data/
-slates/
+
+# Slates are generated, but a dated slate is the frozen pre-game model for one
+# day and must never be refreshed. Committing it alongside the board is what
+# makes the pre-game numbers verifiable from git instead of from container disk.
+slates/*
+!slates/20*/
+
+# Slates for 2026-08-26 .. 2026-09-09 predate that rule. They are still on disk
+# and their numbers already reached the record through game_projections.csv at
+# settlement, but adding the files now -- after the results are known -- would
+# be exactly the retro-fitting this record exists to avoid. Left untracked.
+slates/2026-08-*/
+slates/2026-09-0*/
