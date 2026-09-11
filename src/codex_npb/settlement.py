@@ -237,7 +237,7 @@ def write_candidates(settled: Sequence[SettledMarket], path: Path) -> Path:
                 entry.game_date, entry.away, entry.home, entry.market, entry.selection,
                 entry.line, f"{entry.hong_kong_odds:.3f}",
                 f"{entry.model_probability:.4f}",
-                f"{0.5:.4f}" if entry.warnings else "",
+                f"{entry.market_no_vig_probability:.4f}",
                 f"{entry.fair_decimal_odds:.3f}", f"{entry.expected_value:.4f}",
                 f"{entry.minimum_decimal_odds:.3f}",
                 f"{entry.model_expectation:.3f}", f"{entry.line_expectation:.3f}",

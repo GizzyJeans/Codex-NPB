@@ -11,6 +11,14 @@ the same number it returns exactly 0.50 for every game — the board carries
 its opinion in the *line*, not the price. Results from such a board are
 flagged so ``probability_gap`` is not mistaken for a real edge over the
 market.
+
+When the two sides *are* quoted differently the board is stating an opinion
+in the price as well, and that opinion has to reach the pricing rather than
+be averaged away. ``hcap_odds`` and ``total_odds`` carry the favourite's and
+the over's price; the optional ``hcap_odds_dog`` and ``total_odds_under``
+columns carry the other side when it differs. Omitting them means the board
+quoted one number for both sides, which is how every board before
+2026-09-11 was priced, so those files read unchanged.
 """
 
 from __future__ import annotations
@@ -23,6 +31,7 @@ from typing import Iterable
 from .model import (
     Eligibility,
     ModelConfig,
+    ModelError,
     SpreadMarket,
     TotalMarket,
     build_score_distribution,
@@ -42,6 +51,13 @@ REQUIRED_COLUMNS = {
     "total_odds",
 }
 
+# Present only when the board quotes the two sides of a market differently.
+# Absent, each side is priced at the single number the board printed.
+OPTIONAL_COLUMNS = {
+    "hcap_odds_dog",
+    "total_odds_under",
+}
+
 
 class BoardError(ValueError):
     """Raised when a board row cannot be read as a market."""
@@ -59,6 +75,30 @@ class BoardGame:
     handicap_odds: float
     total_line: str
     total_odds: float
+    handicap_odds_dog: float | None = None
+    total_odds_under: float | None = None
+
+    @property
+    def favorite_odds(self) -> float:
+        return self.handicap_odds
+
+    @property
+    def underdog_odds(self) -> float:
+        return (
+            self.handicap_odds if self.handicap_odds_dog is None
+            else self.handicap_odds_dog
+        )
+
+    @property
+    def over_odds(self) -> float:
+        return self.total_odds
+
+    @property
+    def under_odds(self) -> float:
+        return (
+            self.total_odds if self.total_odds_under is None
+            else self.total_odds_under
+        )
 
     @property
     def handicap_priceable(self) -> bool:
@@ -68,7 +108,13 @@ class BoardGame:
         the platform's shorthand, and guessing swaps a near-pick-em for a
         half-ball line. The rest of the row still prices.
         """
-        return bool(self.handicap.strip())
+        if not self.handicap.strip():
+            return False
+        try:
+            parse_tail_line(self.handicap)
+        except ModelError:
+            return False
+        return True
 
     @property
     def underdog(self) -> str:
@@ -92,6 +138,7 @@ class PricedMarket:
     line: str
     hong_kong_odds: float
     model_probability: float
+    market_no_vig_probability: float
     expected_value: float
     fair_decimal_odds: float
     minimum_decimal_odds: float
@@ -133,9 +180,17 @@ def read_board(path: Path | str) -> list[BoardGame]:
         if side not in {"away", "home"}:
             raise BoardError(f"line {index}: hcap_side must be away or home")
         handicap = row["hcap"].strip()
-        if handicap:
-            parse_tail_line(handicap)
+        # An unreadable handicap must not take the total down with it: the
+        # row still carries a priceable total, and BoardGame.handicap_priceable
+        # reports the spread as unpriceable rather than guessing at the tail.
+        # The total is strict, because a row whose total cannot be read is a
+        # transcription error worth stopping for.
         parse_tail_line(row["total"])
+
+        def _odds(column: str) -> float | None:
+            raw = (row.get(column) or "").strip()
+            return float(raw) if raw else None
+
         games.append(
             BoardGame(
                 game_date=row["date"].strip(),
@@ -146,6 +201,8 @@ def read_board(path: Path | str) -> list[BoardGame]:
                 handicap_odds=float(row["hcap_odds"]),
                 total_line=row["total"].strip(),
                 total_odds=float(row["total_odds"]),
+                handicap_odds_dog=_odds("hcap_odds_dog"),
+                total_odds_under=_odds("total_odds_under"),
             )
         )
     return games
@@ -194,11 +251,20 @@ def price_game(
 
     priced: list[PricedMarket] = []
 
-    def add(market, selection, label, line, odds, model_expectation, line_expectation):
+    def add(
+        market,
+        selection,
+        label,
+        line,
+        odds,
+        opposite_odds,
+        model_expectation,
+        line_expectation,
+    ):
         result = evaluate_market(
             distribution,
             market,
-            odds,
+            opposite_odds,
             eligibility,
             bankroll=bankroll,
             max_stake=max_stake,
@@ -220,6 +286,7 @@ def price_game(
                 line=line,
                 hong_kong_odds=odds,
                 model_probability=result["effective_model_probability"],
+                market_no_vig_probability=result["market_no_vig_probability"],
                 expected_value=result["expected_value"],
                 fair_decimal_odds=result["fair_decimal_odds"],
                 minimum_decimal_odds=result["minimum_decimal_odds_for_target_ev"],
@@ -235,7 +302,13 @@ def price_game(
     handicap_line = (
         _effective_line(game.handicap) if game.handicap_priceable else 0.0
     )
-    for selection in (game.favorite, game.underdog) if game.handicap_priceable else ():
+    spread_sides = (
+        ((game.favorite, game.favorite_odds, game.underdog_odds),
+         (game.underdog, game.underdog_odds, game.favorite_odds))
+        if game.handicap_priceable
+        else ()
+    )
+    for selection, odds, opposite_odds in spread_sides:
         add(
             SpreadMarket(
                 away_team=game.away,
@@ -243,26 +316,31 @@ def price_game(
                 favorite=game.favorite,
                 selection=selection,
                 line=game.handicap,
-                hong_kong_odds=game.handicap_odds,
+                hong_kong_odds=odds,
             ),
             selection,
             "spread",
             game.handicap,
-            game.handicap_odds,
+            odds,
+            opposite_odds,
             model_margin,
             handicap_line,
         )
-    for selection in ("over", "under"):
+    for selection, odds, opposite_odds in (
+        ("over", game.over_odds, game.under_odds),
+        ("under", game.under_odds, game.over_odds),
+    ):
         add(
             TotalMarket(
                 selection=selection,
                 line=game.total_line,
-                hong_kong_odds=game.total_odds,
+                hong_kong_odds=odds,
             ),
             selection,
             "total",
             game.total_line,
-            game.total_odds,
+            odds,
+            opposite_odds,
             model_total,
             total_line,
         )

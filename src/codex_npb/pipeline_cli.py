@@ -200,7 +200,17 @@ def board_main(argv: list[str] | None = None) -> int:
     shown = [market for market in priced if market.expected_value >= args.min_ev]
     shown.sort(key=lambda market: -market.expected_value)
 
-    print(f"{len(priced)} markets priced, {len(shown)} at or above EV {args.min_ev:+.2%}\n")
+    print(f"{len(priced)} markets priced, {len(shown)} at or above EV {args.min_ev:+.2%}")
+    # A handicap the board writes ambiguously yields no market at all, so it
+    # would otherwise show up only as two missing rows in a count nobody
+    # checks. Name it.
+    unreadable = [g for g in games if g.handicap.strip() and not g.handicap_priceable]
+    for game in unreadable:
+        print(
+            f"  SPREAD SKIPPED  {game.away} @ {game.home}: handicap "
+            f"{game.handicap!r} cannot be read unambiguously; the total still prices"
+        )
+    print()
     header = (
         f"{'game':<34}{'market':<8}{'selection':<26}{'line':>6}"
         f"{'model p':>9}{'EV':>9}{'gap(runs)':>11}{'status':>7}"

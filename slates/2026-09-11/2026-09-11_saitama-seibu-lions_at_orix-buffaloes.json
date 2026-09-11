@@ -7,22 +7,19 @@
     "start_time": "18:00"
   },
   "model": {
-    "away_mu": 3.5237,
-    "home_mu": 2.7972,
-    "dispersion": 2.911074032528242,
-    "final_draw_share": 0.1595345549491805,
+    "away_mu": 3.4334,
+    "home_mu": 3.1298,
+    "dispersion": 2.9260963680152776,
+    "final_draw_share": 0.15850995471899582,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 6.321,
+    "expected_total": 6.563,
     "park_factor": 0.9061,
-    "league_runs_per_game": 3.7952,
-    "away_starter": null,
-    "home_starter": null,
-    "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
-    ]
+    "league_runs_per_game": 3.7968,
+    "away_starter": "渡邉 勇太朗",
+    "home_starter": "山口 廉王",
+    "notes": []
   },
   "market": {
     "_comment": "FILL IN FROM YOUR PLATFORM. No price is inferred.",
@@ -35,16 +32,15 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
+    "home starter 山口 廉王 has only 4.0 IP this season",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,

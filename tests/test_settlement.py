@@ -45,6 +45,7 @@ def priced(market, selection, line, odds, status="WATCH", ev=0.2):
         line=line,
         hong_kong_odds=odds,
         model_probability=0.62,
+        market_no_vig_probability=0.5,
         expected_value=ev,
         fair_decimal_odds=1.6,
         minimum_decimal_odds=1.7,
@@ -282,7 +283,7 @@ class CancelledGameTests(unittest.TestCase):
         played = PricedMarket(
             game_date="2026-09-08", away=other.away, home=other.home, market="total",
             selection="under", line="6", hong_kong_odds=0.93, model_probability=0.55,
-            expected_value=0.1, fair_decimal_odds=1.8, minimum_decimal_odds=1.9,
+            market_no_vig_probability=0.5, expected_value=0.1, fair_decimal_odds=1.8, minimum_decimal_odds=1.9,
             status="WATCH", recommended_stake=0.0, outcome_probabilities={},
             model_expectation=6.2, line_expectation=6.0,
         )

@@ -160,9 +160,33 @@ class UnreadableHandicapTests(unittest.TestCase):
             + f"2026-08-30,讀賣巨人,阪神虎,home,{handicap},0.950,5-50,0.930\n"
         )
 
-    def test_single_digit_tail_is_rejected_outright(self):
-        # "1+5" could be 5% or 50%; those are different lines.
+    def test_single_digit_tail_makes_only_the_spread_unpriceable(self):
+        # "1+5" could be 5% or 50%; those are different lines, so the spread
+        # is not guessed at. It used to take the whole board read down with
+        # it, which also threw away a total the board had priced perfectly
+        # well -- and which handicap_priceable has always promised to keep.
         keep, path = self.board("1+5")
+        game = read_board(path)[0]
+        self.assertFalse(game.handicap_priceable)
+        self.assertEqual(game.handicap, "1+5", "the raw string stays on the record")
+        self.assertFalse(game.is_level)
+        priced = price_game(
+            game,
+            away_mu=4.0,
+            home_mu=4.0,
+            dispersion=3.0,
+            final_draw_share=0.15,
+            eligibility=CONFIRMED,
+        )
+        self.assertEqual({m.market for m in priced}, {"total"})
+        keep.cleanup()
+
+    def test_an_unreadable_total_still_stops_the_read(self):
+        # A total that cannot be parsed is a transcription error, not a
+        # platform shorthand, and leaves the row with nothing to price.
+        keep, path = write(
+            HEADER + "2026-08-30,讀賣巨人,阪神虎,home,1+50,0.950,5+5,0.930\n"
+        )
         with self.assertRaises(Exception):
             read_board(path)
         keep.cleanup()
@@ -202,3 +226,83 @@ class UnreadableHandicapTests(unittest.TestCase):
             eligibility=CONFIRMED,
         )
         self.assertEqual(len(priced), 4)
+
+
+class TwoPricedBoardTests(unittest.TestCase):
+    """A board that quotes the two sides differently is stating an opinion.
+
+    Before 2026-09-11 every board carried one price for both sides of a
+    market, so pricing could use that single number twice. When the sides
+    differ, each has to be priced at its own number and read against the
+    other -- using one side's price for both silently re-prices half the
+    board.
+    """
+
+    def game(self, extra_columns="", extra_values=""):
+        keep, path = write(
+            HEADER.rstrip("\n") + extra_columns + "\n"
+            + "2026-09-11,千葉羅德,福岡軟銀鷹,home,1+10,0.920,7平,0.900"
+            + extra_values + "\n"
+        )
+        game = read_board(path)[0]
+        keep.cleanup()
+        return game
+
+    def priced(self, game):
+        return {
+            (m.market, m.selection): m
+            for m in price_game(
+                game,
+                away_mu=4.0,
+                home_mu=4.2,
+                dispersion=3.0,
+                final_draw_share=0.15,
+                eligibility=CONFIRMED,
+            )
+        }
+
+    def test_each_side_is_priced_at_its_own_number(self):
+        game = self.game(",hcap_odds_dog,total_odds_under", ",0.980,0.960")
+        self.assertEqual(game.favorite_odds, 0.920)
+        self.assertEqual(game.underdog_odds, 0.980)
+        self.assertEqual(game.over_odds, 0.900)
+        self.assertEqual(game.under_odds, 0.960)
+        priced = self.priced(game)
+        self.assertEqual(priced[("spread", "Fukuoka SoftBank Hawks")].hong_kong_odds, 0.920)
+        self.assertEqual(priced[("spread", "Chiba Lotte Marines")].hong_kong_odds, 0.980)
+        self.assertEqual(priced[("total", "over")].hong_kong_odds, 0.900)
+        self.assertEqual(priced[("total", "under")].hong_kong_odds, 0.960)
+
+    def test_differing_prices_make_the_market_probability_informative(self):
+        priced = self.priced(self.game(",hcap_odds_dog,total_odds_under", ",0.980,0.960"))
+        over = priced[("total", "over")]
+        under = priced[("total", "under")]
+        # The cheaper side is the one the board thinks more likely, and the
+        # two no-vig probabilities must complement each other.
+        self.assertGreater(over.market_no_vig_probability, 0.5)
+        self.assertAlmostEqual(
+            over.market_no_vig_probability + under.market_no_vig_probability,
+            1.0,
+            places=9,
+        )
+        self.assertEqual(over.warnings, [], "no coin-flip warning on a two-priced market")
+
+    def test_a_single_price_still_applies_to_both_sides(self):
+        game = self.game()
+        self.assertIsNone(game.handicap_odds_dog)
+        self.assertIsNone(game.total_odds_under)
+        self.assertEqual(game.underdog_odds, game.favorite_odds)
+        self.assertEqual(game.under_odds, game.over_odds)
+        priced = self.priced(game)
+        over = priced[("total", "over")]
+        self.assertAlmostEqual(over.market_no_vig_probability, 0.5, places=9)
+        self.assertTrue(over.warnings, "a one-priced market still carries the warning")
+
+    def test_blank_override_columns_read_as_absent(self):
+        game = self.game(",hcap_odds_dog,total_odds_under", ",,")
+        self.assertEqual(game.underdog_odds, 0.920)
+        self.assertEqual(game.under_odds, 0.900)
+
+
+if __name__ == "__main__":
+    unittest.main()
