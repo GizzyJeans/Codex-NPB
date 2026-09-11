@@ -1,0 +1,11 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-09-11,Chiba Lotte Marines,Fukuoka SoftBank Hawks,total,over,7.5,0.900,0.4441,0.5078,2.252,-0.1562,2.342,7.555,7.500,+0.055,PASS,0,true
+2026-09-11,Chiba Lotte Marines,Fukuoka SoftBank Hawks,total,under,7.5,0.960,0.5559,0.4922,1.799,0.0895,1.871,7.555,7.500,+0.055,WATCH,0,true
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,spread,Saitama Seibu Lions,1+10,0.920,0.4348,0.5077,2.300,-0.1394,2.409,0.304,0.950,-0.646,PASS,0,true
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,spread,Orix Buffaloes,1+10,0.980,0.5652,0.4923,1.769,0.1005,1.853,0.304,0.950,-0.646,WATCH,0,true
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,total,over,7平,0.900,0.3964,0.5078,2.523,-0.2175,2.637,6.563,7.000,-0.437,PASS,0,true
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,total,under,7平,0.960,0.6036,0.4922,1.657,0.1613,1.732,6.563,7.000,-0.437,WATCH,0,true
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,spread,Yokohama DeNA BayStars,1+40,0.950,0.5312,0.5000,1.882,0.0323,1.966,0.864,0.800,+0.064,PASS,0,true
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,spread,Hiroshima Carp,1+40,0.950,0.4688,0.5000,2.133,-0.0771,2.228,0.864,0.800,+0.064,PASS,0,true
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,total,over,7+75,0.930,0.5029,0.5000,1.989,-0.0286,2.071,7.060,6.625,+0.435,PASS,0,true
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,total,under,7+75,0.930,0.4971,0.5000,2.012,-0.0393,2.094,7.060,6.625,+0.435,PASS,0,true

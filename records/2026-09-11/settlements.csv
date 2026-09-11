@@ -1,0 +1,11 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,prospective,official_source
+2026-09-11,Chiba Lotte Marines,Fukuoka SoftBank Hawks,total,over,7.5,1,11,12,WIN,1000,+900,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Chiba Lotte Marines,Fukuoka SoftBank Hawks,total,under,7.5,1,11,12,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,spread,Saitama Seibu Lions,1+10,4,5,9,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,spread,Orix Buffaloes,1+10,4,5,9,WIN,1000,+980,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,total,over,7平,4,5,9,WIN,1000,+900,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Saitama Seibu Lions,Orix Buffaloes,total,under,7平,4,5,9,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,spread,Yokohama DeNA BayStars,1+40,6,1,7,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,spread,Hiroshima Carp,1+40,6,1,7,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,total,over,7+75,6,1,7,PARTIAL_WIN,1000,+698,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
+2026-09-11,Yokohama DeNA BayStars,Hiroshima Carp,total,under,7+75,6,1,7,PARTIAL_LOSS,1000,-750,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260911.html
