@@ -7,20 +7,19 @@
     "start_time": "14:00"
   },
   "model": {
-    "away_mu": 3.141,
-    "home_mu": 5.2681,
-    "dispersion": 2.9260963680152776,
-    "final_draw_share": 0.15850995471899582,
+    "away_mu": 3.1175,
+    "home_mu": 5.0696,
+    "dispersion": 2.923577953853522,
+    "final_draw_share": 0.15804493127739636,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 8.409,
-    "park_factor": 1.0073,
-    "league_runs_per_game": 3.7968,
-    "away_starter": null,
+    "expected_total": 8.187,
+    "park_factor": 1.0119,
+    "league_runs_per_game": 3.8045,
+    "away_starter": "小島 和哉",
     "home_starter": null,
     "notes": [
-      "away starter unknown; club rotation rate used in its place",
       "home starter unknown; club rotation rate used in its place"
     ]
   },
@@ -43,8 +42,7 @@
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
+    "home starter unresolved (no roster entry found)",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,
