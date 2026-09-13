@@ -16,7 +16,7 @@ import csv
 from dataclasses import dataclass
 from datetime import date as _date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Iterable, Mapping, Sequence
+from typing import Collection, Iterable, Mapping, Sequence
 
 from .board import BoardGame, PricedMarket
 from .model import SpreadMarket, TotalMarket
@@ -280,7 +280,24 @@ def write_projections(
     *,
     model_version: str,
     record_origin: str,
+    first_pitch: Mapping[tuple[str, str], datetime | None] | None = None,
+    priced_at: datetime | None = None,
+    priced_games: Collection[tuple[str, str]] | None = None,
 ) -> Path:
+    """Write one row per projected game, each stamped with its own origin.
+
+    ``record_origin`` used to be a single day-level string copied onto every
+    row. A slate can hold games that started hours apart, and one rebuilt
+    late in the day will contain games already underway -- 2026-09-13 wrote
+    ``prospective_pre_first_pitch`` onto two such games. Origin is therefore
+    decided per game, exactly as the market flags are:
+
+    - a game with no priced market was never on the board, so it is recorded
+      as ``not_priced`` whatever the clock says;
+    - a game priced after its own first pitch is ``post_hoc``;
+    - only a priced game whose first pitch is still ahead keeps the
+      prospective label.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         writer = csv.writer(handle)
@@ -294,6 +311,13 @@ def write_projections(
             result = results.get(key)
             detail = entry.get("projection_detail", {})
             model = entry["model"]
+            start = (first_pitch or {}).get(key)
+            if priced_games is not None and key not in priced_games:
+                origin = "not_priced"
+            elif priced_at is not None and start is not None and priced_at >= start:
+                origin = "post_hoc"
+            else:
+                origin = record_origin
             writer.writerow([
                 entry["game"]["date"], key[0], key[1],
                 f"{model['away_mu']:.4f}", f"{model['home_mu']:.4f}",
@@ -303,6 +327,6 @@ def write_projections(
                 result.away_score if result else "",
                 result.home_score if result else "",
                 result.total_runs if result else "",
-                model_version, record_origin,
+                model_version, origin,
             ])
     return path

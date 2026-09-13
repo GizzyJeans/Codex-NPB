@@ -351,6 +351,9 @@ def settle_main(argv: list[str] | None = None) -> int:
             if args.recorded_before_first_pitch
             else "post_hoc"
         ),
+        first_pitch=first_pitch,
+        priced_at=priced_at,
+        priced_games={(game.away, game.home) for game in games},
     )
     write_candidates(settled, directory / "candidates.csv")
     write_settlements(settled, directory / "settlements.csv", official_source=source)

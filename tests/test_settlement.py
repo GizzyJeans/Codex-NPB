@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from codex_npb.board import BoardGame, PricedMarket
 from codex_npb.settlement import (
     SettlementError,
+    first_pitch_utc,
     settle_board,
     summarize,
     write_settlements,
@@ -297,3 +298,84 @@ class CancelledGameTests(unittest.TestCase):
         self.assertEqual(summary.voided, 2)
         self.assertEqual(summary.watch, 1)
         self.assertEqual(summary.watch_wins, 1)
+
+
+class ProjectionOriginTests(unittest.TestCase):
+    """Origin is a per-game fact, not a property of the day.
+
+    On 2026-09-13 the board arrived after two of the day's five games had
+    already started. Those two were left off the board, but the slate still
+    held them, and write_projections stamped the day-level
+    "prospective_pre_first_pitch" onto every row -- including a game that had
+    begun nearly four hours earlier.
+    """
+
+    def rows(self, **kwargs):
+        import csv as _csv
+        import tempfile
+        from pathlib import Path as _Path
+        from codex_npb.settlement import write_projections
+
+        def entry(away, home, start):
+            return {
+                "game": {"date": "2026-09-13", "away": away, "home": home,
+                         "start_time": start},
+                "model": {"away_mu": 3.0, "home_mu": 3.5},
+                "projection_detail": {"away_starter": "a", "home_starter": "b",
+                                      "park_factor": 1.0},
+            }
+
+        projections = {
+            ("Chiba Lotte Marines", "Fukuoka SoftBank Hawks"):
+                entry("Chiba Lotte Marines", "Fukuoka SoftBank Hawks", "13:30"),
+            ("Hokkaido Nippon-Ham Fighters", "Saitama Seibu Lions"):
+                entry("Hokkaido Nippon-Ham Fighters", "Saitama Seibu Lions", "17:00"),
+            ("Chunichi Dragons", "Hanshin Tigers"):
+                entry("Chunichi Dragons", "Hanshin Tigers", "18:00"),
+        }
+        first_pitch = {
+            k: first_pitch_utc(date(2026, 9, 13), v["game"]["start_time"])
+            for k, v in projections.items()
+        }
+        keep = tempfile.TemporaryDirectory()
+        path = write_projections(
+            projections, {}, _Path(keep.name) / "p.csv",
+            model_version="v", record_origin="prospective_pre_first_pitch",
+            first_pitch=first_pitch, **kwargs,
+        )
+        rows = {(r["away"], r["home"]): r["record_origin"]
+                for r in _csv.DictReader(path.read_text(encoding="utf-8").splitlines())}
+        keep.cleanup()
+        return rows
+
+    def test_a_game_left_off_the_board_is_not_priced(self):
+        # Priced at 08:26 UTC, with only the 18:00 JST game on the board.
+        rows = self.rows(
+            priced_at=datetime(2026, 9, 13, 8, 26, tzinfo=timezone.utc),
+            priced_games={("Chunichi Dragons", "Hanshin Tigers")},
+        )
+        self.assertEqual(rows[("Chiba Lotte Marines", "Fukuoka SoftBank Hawks")],
+                         "not_priced")
+        self.assertEqual(rows[("Hokkaido Nippon-Ham Fighters", "Saitama Seibu Lions")],
+                         "not_priced")
+        self.assertEqual(rows[("Chunichi Dragons", "Hanshin Tigers")],
+                         "prospective_pre_first_pitch")
+
+    def test_a_priced_game_already_underway_is_post_hoc(self):
+        # The 17:00 JST game started at 08:00 UTC; pricing it at 08:26 is late.
+        rows = self.rows(
+            priced_at=datetime(2026, 9, 13, 8, 26, tzinfo=timezone.utc),
+            priced_games={
+                ("Hokkaido Nippon-Ham Fighters", "Saitama Seibu Lions"),
+                ("Chunichi Dragons", "Hanshin Tigers"),
+            },
+        )
+        self.assertEqual(rows[("Hokkaido Nippon-Ham Fighters", "Saitama Seibu Lions")],
+                         "post_hoc")
+        self.assertEqual(rows[("Chunichi Dragons", "Hanshin Tigers")],
+                         "prospective_pre_first_pitch")
+
+    def test_without_timing_information_the_day_level_label_still_applies(self):
+        # Older callers pass neither, and must keep their existing behaviour.
+        rows = self.rows()
+        self.assertEqual(set(rows.values()), {"prospective_pre_first_pitch"})
