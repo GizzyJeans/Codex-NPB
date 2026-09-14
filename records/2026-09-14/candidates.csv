@@ -1,0 +1,13 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-09-14,Chunichi Dragons,Hanshin Tigers,spread,Hanshin Tigers,1-25,0.950,0.3901,0.5000,2.564,-0.2042,2.684,0.326,1.125,-0.799,PASS,0,true
+2026-09-14,Chunichi Dragons,Hanshin Tigers,spread,Chunichi Dragons,1-25,0.950,0.6099,0.5000,1.640,0.1615,1.716,0.326,1.125,-0.799,WATCH,0,true
+2026-09-14,Chunichi Dragons,Hanshin Tigers,total,over,6+75,0.930,0.4339,0.5000,2.305,-0.1589,2.399,5.551,5.625,-0.074,PASS,0,true
+2026-09-14,Chunichi Dragons,Hanshin Tigers,total,under,6+75,0.930,0.5661,0.5000,1.766,0.0904,1.839,5.551,5.625,-0.074,WATCH,0,true
+2026-09-14,Hiroshima Carp,Tokyo Yakult Swallows,spread,Hiroshima Carp,1+80,0.950,0.4511,0.5000,2.217,-0.1168,2.308,-0.241,0.600,-0.841,PASS,0,true
+2026-09-14,Hiroshima Carp,Tokyo Yakult Swallows,spread,Tokyo Yakult Swallows,1+80,0.950,0.5489,0.5000,1.822,0.0683,1.897,-0.241,0.600,-0.841,WATCH,0,true
+2026-09-14,Hiroshima Carp,Tokyo Yakult Swallows,total,over,7-75,0.930,0.4680,0.5000,2.137,-0.0939,2.225,7.626,7.375,+0.251,PASS,0,true
+2026-09-14,Hiroshima Carp,Tokyo Yakult Swallows,total,under,7-75,0.930,0.5320,0.5000,1.880,0.0259,1.957,7.626,7.375,+0.251,PASS,0,true
+2026-09-14,Yomiuri Giants,Yokohama DeNA BayStars,spread,Yokohama DeNA BayStars,1平,0.950,0.3925,0.5000,2.548,-0.1963,2.670,0.018,1.000,-0.982,PASS,0,true
+2026-09-14,Yomiuri Giants,Yokohama DeNA BayStars,spread,Yomiuri Giants,1平,0.950,0.6075,0.5000,1.646,0.1545,1.725,0.018,1.000,-0.982,WATCH,0,true
+2026-09-14,Yomiuri Giants,Yokohama DeNA BayStars,total,over,7平,0.930,0.4340,0.5000,2.304,-0.1430,2.409,6.887,7.000,-0.113,PASS,0,true
+2026-09-14,Yomiuri Giants,Yokohama DeNA BayStars,total,under,7平,0.930,0.5660,0.5000,1.767,0.0814,1.847,6.887,7.000,-0.113,WATCH,0,true
