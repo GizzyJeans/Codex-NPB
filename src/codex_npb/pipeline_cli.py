@@ -171,6 +171,15 @@ def backtest_main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def _slate_notes(slate: Path, game) -> list[str]:
+    """Projection warnings for one board game, read from the frozen slate."""
+    for path in sorted(Path(slate).glob("*.json")):
+        entry = json.loads(path.read_text(encoding="utf-8"))
+        if (entry["game"]["away"], entry["game"]["home"]) == (game.away, game.home):
+            return list(entry.get("projection_detail", {}).get("notes", []))
+    return []
+
+
 def board_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Price a Taiwanese board against the projected slate"
@@ -210,6 +219,13 @@ def board_main(argv: list[str] | None = None) -> int:
             f"  SPREAD SKIPPED  {game.away} @ {game.home}: handicap "
             f"{game.handicap!r} cannot be read unambiguously; the total still prices"
         )
+    # The slate already records why a projection is shaky -- an unmatched
+    # starter, a reliever announced as one, a missing park factor -- but those
+    # notes lived only in the JSON nobody opens before pricing. Print them
+    # against the games they belong to.
+    for game in games:
+        for note in _slate_notes(args.slate, game):
+            print(f"  PROJECTION  {game.away} @ {game.home}: {note}")
     print()
     header = (
         f"{'game':<34}{'market':<8}{'selection':<26}{'line':>6}"

@@ -245,3 +245,47 @@ class BullpenDecompositionTests(unittest.TestCase):
     def test_share_outside_zero_to_one_rejected(self):
         with self.assertRaises(ProjectionError):
             ProjectionSettings(starter_innings_share=1.4)
+
+
+class AnnouncedRelieverTests(unittest.TestCase):
+    """An opener announced as the starter is a projection hazard, not a fact.
+
+    project_game hands the announced starter roughly 62% of the game. On
+    2026-09-15 two clubs announced arms averaging 0.90 and 1.94 innings an
+    outing, which credits a short reliever's rate across five innings the
+    bullpen will pitch. Relievers post better rates than rotations, so the
+    error is one-directional: it flatters the side that announced them.
+    """
+
+    def starter(self, innings, appearances):
+        return StarterSeason(
+            name="opener", team="Saitama Seibu Lions",
+            innings_pitched=innings, runs_allowed=5, appearances=appearances,
+        )
+
+    def test_a_short_reliever_is_detected(self):
+        # 18.0 innings over 20 appearances is 0.90 an outing.
+        arm = self.starter(18.0, 20)
+        self.assertAlmostEqual(arm.innings_per_appearance, 0.90, places=2)
+        self.assertTrue(arm.pitches_like_a_reliever)
+
+    def test_a_genuine_starter_is_not(self):
+        # 144.0 innings over 23 appearances is 6.26 an outing.
+        arm = self.starter(144.0, 23)
+        self.assertFalse(arm.pitches_like_a_reliever)
+
+    def test_the_threshold_is_the_one_staff_splits_rotations_on(self):
+        from codex_npb.staff import ROTATION_INNINGS_PER_APPEARANCE
+        just_under = self.starter(ROTATION_INNINGS_PER_APPEARANCE - 0.01, 1)
+        just_over = self.starter(ROTATION_INNINGS_PER_APPEARANCE + 0.01, 1)
+        self.assertTrue(just_under.pitches_like_a_reliever)
+        self.assertFalse(just_over.pitches_like_a_reliever)
+
+    def test_a_missing_appearance_count_makes_no_claim(self):
+        # Older callers build StarterSeason without appearances; silence is
+        # correct there, since the shape is unknown rather than known-good.
+        arm = StarterSeason(
+            name="unknown", team="X", innings_pitched=18.0, runs_allowed=5,
+        )
+        self.assertIsNone(arm.innings_per_appearance)
+        self.assertFalse(arm.pitches_like_a_reliever)

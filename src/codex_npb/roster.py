@@ -84,6 +84,7 @@ def match_starter(
                 team=line.team,
                 innings_pitched=line.innings_pitched,
                 runs_allowed=line.runs_allowed,
+                appearances=getattr(line, "appearances", None),
             ),
         )
     return StarterMatch(

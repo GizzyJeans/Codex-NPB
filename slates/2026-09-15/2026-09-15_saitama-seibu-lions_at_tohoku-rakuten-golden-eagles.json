@@ -7,21 +7,20 @@
     "start_time": "18:00"
   },
   "model": {
-    "away_mu": 3.9257,
-    "home_mu": 3.0928,
-    "dispersion": 2.939413106978216,
-    "final_draw_share": 0.16666106334968733,
+    "away_mu": 3.8933,
+    "home_mu": 3.2485,
+    "dispersion": 2.9377654047939314,
+    "final_draw_share": 0.1658873964459923,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 7.018,
+    "expected_total": 7.142,
     "park_factor": 1.0232,
     "league_runs_per_game": 3.8096,
-    "away_starter": null,
-    "home_starter": null,
+    "away_starter": "森脇 亮介",
+    "home_starter": "伊藤 樹",
     "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
+      "away starter 森脇 亮介 pitches 0.90 innings an outing over 20 appearances; the projection still hands them a starter's share of the game, which flatters this side"
     ]
   },
   "market": {
@@ -35,16 +34,16 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
+    "away starter 森脇 亮介 has only 18.0 IP this season",
+    "home starter 伊藤 樹 has only 13.0 IP this season",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,

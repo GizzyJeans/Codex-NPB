@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable, Mapping
 
-from .staff import LeagueStaffContext, StaffSplit
+from .staff import ROTATION_INNINGS_PER_APPEARANCE, LeagueStaffContext, StaffSplit
 from .teams import resolve
 
 
@@ -51,12 +51,34 @@ class StarterSeason:
     team: str
     innings_pitched: float
     runs_allowed: int
+    appearances: int | None = None
 
     @property
     def ra9(self) -> float:
         if self.innings_pitched <= 0:
             raise ProjectionError(f"{self.name}: no innings pitched")
         return self.runs_allowed / self.innings_pitched * 9
+
+    @property
+    def innings_per_appearance(self) -> float | None:
+        """None when the source did not carry an appearance count."""
+        if not self.appearances:
+            return None
+        return self.innings_pitched / self.appearances
+
+    @property
+    def pitches_like_a_reliever(self) -> bool:
+        """True when this arm's own workload says it does not start.
+
+        The projection hands the announced starter roughly 62% of the game.
+        For an opener who throws an inning, that credits a reliever's rate
+        across five innings the bullpen will actually pitch -- and short
+        relievers post better rates than rotations do, so the error runs one
+        way: it makes the team look better than it is. The threshold is the
+        same one staff.py splits rotations on.
+        """
+        per = self.innings_per_appearance
+        return per is not None and per < ROTATION_INNINGS_PER_APPEARANCE
 
 
 @dataclass(frozen=True)
@@ -291,6 +313,13 @@ def project_game(
             )
             starter_index = rotation_rate / context.rotation_ra9
         else:
+            if starter.pitches_like_a_reliever:
+                notes.append(
+                    f"{label} starter {starter.name} pitches "
+                    f"{starter.innings_per_appearance:.2f} innings an outing over "
+                    f"{starter.appearances} appearances; the projection still hands "
+                    "them a starter's share of the game, which flatters this side"
+                )
             starter_rate = shrink(
                 starter.ra9,
                 context.rotation_ra9,

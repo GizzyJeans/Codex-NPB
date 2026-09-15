@@ -7,21 +7,20 @@
     "start_time": "18:00"
   },
   "model": {
-    "away_mu": 3.9523,
-    "home_mu": 4.0748,
-    "dispersion": 2.939413106978216,
-    "final_draw_share": 0.16666106334968733,
+    "away_mu": 4.42,
+    "home_mu": 3.4722,
+    "dispersion": 2.9377654047939314,
+    "final_draw_share": 0.1658873964459923,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 8.027,
-    "park_factor": 1.1906,
-    "league_runs_per_game": 3.3914,
-    "away_starter": null,
-    "home_starter": null,
+    "expected_total": 7.892,
+    "park_factor": 1.1835,
+    "league_runs_per_game": 3.3857,
+    "away_starter": "鈴木 健矢",
+    "home_starter": "吉村 貢司郎",
     "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
+      "away starter 鈴木 健矢 pitches 1.94 innings an outing over 30 appearances; the projection still hands them a starter's share of the game, which flatters this side"
     ]
   },
   "market": {
@@ -35,16 +34,14 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,
