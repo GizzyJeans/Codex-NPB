@@ -1,0 +1,25 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-09-15,Chunichi Dragons,Hanshin Tigers,spread,Hanshin Tigers,1+20,0.950,0.3802,0.5000,2.630,-0.2201,2.754,-0.123,0.900,-1.023,PASS,0,true
+2026-09-15,Chunichi Dragons,Hanshin Tigers,spread,Chunichi Dragons,1+20,0.950,0.6198,0.5000,1.613,0.1776,1.689,-0.123,0.900,-1.023,WATCH,0,true
+2026-09-15,Chunichi Dragons,Hanshin Tigers,total,over,6-75,0.930,0.3644,0.5000,2.744,-0.2899,2.857,5.554,6.375,-0.821,PASS,0,true
+2026-09-15,Chunichi Dragons,Hanshin Tigers,total,under,6-75,0.930,0.6356,0.5000,1.573,0.2215,1.638,5.554,6.375,-0.821,WATCH,0,true
+2026-09-15,Chiba Lotte Marines,Hokkaido Nippon-Ham Fighters,spread,Hokkaido Nippon-Ham Fighters,2+40,0.950,0.4239,0.5000,2.359,-0.1634,2.459,1.328,1.800,-0.472,PASS,0,true
+2026-09-15,Chiba Lotte Marines,Hokkaido Nippon-Ham Fighters,spread,Chiba Lotte Marines,2+40,0.950,0.5761,0.5000,1.736,0.1163,1.809,1.328,1.800,-0.472,WATCH,0,true
+2026-09-15,Chiba Lotte Marines,Hokkaido Nippon-Ham Fighters,total,over,7.5,0.930,0.4955,0.5000,2.018,-0.0437,2.099,8.092,7.500,+0.592,PASS,0,true
+2026-09-15,Chiba Lotte Marines,Hokkaido Nippon-Ham Fighters,total,under,7.5,0.930,0.5045,0.5000,1.982,-0.0263,2.061,8.092,7.500,+0.592,PASS,0,true
+2026-09-15,Fukuoka SoftBank Hawks,Orix Buffaloes,spread,Fukuoka SoftBank Hawks,2-10,0.950,0.4323,0.5000,2.313,-0.1415,2.416,1.827,2.050,-0.223,PASS,0,true
+2026-09-15,Fukuoka SoftBank Hawks,Orix Buffaloes,spread,Orix Buffaloes,2-10,0.950,0.5677,0.5000,1.761,0.0965,1.840,1.827,2.050,-0.223,WATCH,0,true
+2026-09-15,Fukuoka SoftBank Hawks,Orix Buffaloes,total,over,7+50,0.930,0.4631,0.5000,2.160,-0.1001,2.251,6.864,6.750,+0.114,PASS,0,true
+2026-09-15,Fukuoka SoftBank Hawks,Orix Buffaloes,total,under,7+50,0.930,0.5369,0.5000,1.862,0.0342,1.942,6.864,6.750,+0.114,PASS,0,true
+2026-09-15,Saitama Seibu Lions,Tohoku Rakuten Golden Eagles,spread,Tohoku Rakuten Golden Eagles,0,0.950,0.4331,0.5000,2.309,-0.1524,2.403,-0.645,0.000,-0.645,PASS,0,true
+2026-09-15,Saitama Seibu Lions,Tohoku Rakuten Golden Eagles,spread,Saitama Seibu Lions,0,0.950,0.5669,0.5000,1.764,0.1034,1.836,-0.645,0.000,-0.645,WATCH,0,true
+2026-09-15,Saitama Seibu Lions,Tohoku Rakuten Golden Eagles,total,over,7平,0.930,0.4622,0.5000,2.164,-0.0951,2.262,7.142,7.000,+0.142,PASS,0,true
+2026-09-15,Saitama Seibu Lions,Tohoku Rakuten Golden Eagles,total,under,7平,0.930,0.5378,0.5000,1.859,0.0334,1.944,7.142,7.000,+0.142,PASS,0,true
+2026-09-15,Hiroshima Carp,Tokyo Yakult Swallows,spread,Tokyo Yakult Swallows,0.5,0.950,0.4026,0.5000,2.484,-0.2149,2.583,-0.948,0.500,-1.448,PASS,0,true
+2026-09-15,Hiroshima Carp,Tokyo Yakult Swallows,spread,Hiroshima Carp,0.5,0.950,0.5974,0.5000,1.674,0.1649,1.741,-0.948,0.500,-1.448,WATCH,0,true
+2026-09-15,Hiroshima Carp,Tokyo Yakult Swallows,total,over,7-50,0.930,0.5074,0.5000,1.971,-0.0194,2.054,7.892,7.250,+0.642,PASS,0,true
+2026-09-15,Hiroshima Carp,Tokyo Yakult Swallows,total,under,7-50,0.930,0.4926,0.5000,2.030,-0.0465,2.116,7.892,7.250,+0.642,PASS,0,true
+2026-09-15,Yomiuri Giants,Yokohama DeNA BayStars,spread,Yokohama DeNA BayStars,1+10,0.950,0.4579,0.5000,2.184,-0.0900,2.288,0.498,0.950,-0.452,PASS,0,true
+2026-09-15,Yomiuri Giants,Yokohama DeNA BayStars,spread,Yomiuri Giants,1+10,0.950,0.5421,0.5000,1.845,0.0480,1.932,0.498,0.950,-0.452,WATCH,0,true
+2026-09-15,Yomiuri Giants,Yokohama DeNA BayStars,total,over,6.5,0.930,0.4641,0.5000,2.155,-0.1043,2.241,6.526,6.500,+0.026,PASS,0,true
+2026-09-15,Yomiuri Giants,Yokohama DeNA BayStars,total,under,6.5,0.930,0.5359,0.5000,1.866,0.0343,1.941,6.526,6.500,+0.026,PASS,0,true
