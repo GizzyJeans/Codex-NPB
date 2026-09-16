@@ -1,0 +1,53 @@
+{
+  "game": {
+    "date": "2026-09-17",
+    "away": "Hiroshima Carp",
+    "home": "Hanshin Tigers",
+    "venue": "甲子園",
+    "start_time": "18:00"
+  },
+  "model": {
+    "away_mu": 2.291,
+    "home_mu": 3.1295,
+    "dispersion": 2.9251519517517757,
+    "final_draw_share": 0.16496055706507498,
+    "max_runs": 24
+  },
+  "projection_detail": {
+    "expected_total": 5.421,
+    "park_factor": 0.8336,
+    "league_runs_per_game": 3.4021,
+    "away_starter": null,
+    "home_starter": null,
+    "notes": [
+      "away starter unknown; club rotation rate used in its place",
+      "home starter unknown; club rotation rate used in its place"
+    ]
+  },
+  "market": {
+    "_comment": "FILL IN FROM YOUR PLATFORM. No price is inferred.",
+    "kind": "spread",
+    "favorite": null,
+    "selection": null,
+    "line": null,
+    "hong_kong_odds": null,
+    "opposite_hk_odds": null
+  },
+  "eligibility": {
+    "rules_confirmed": false,
+    "starters_confirmed": false,
+    "lineups_confirmed": false,
+    "data_complete": false,
+    "market_current": false
+  },
+  "blocking_conditions": [
+    "platform tail-line rules unconfirmed",
+    "market price not supplied",
+    "away starter not announced yet",
+    "home starter not announced yet",
+    "official lineups not published at projection time"
+  ],
+  "bankroll": 100000,
+  "max_stake": 1000,
+  "kelly_fraction": 0.25
+}
