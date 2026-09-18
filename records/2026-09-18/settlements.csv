@@ -1,0 +1,13 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,prospective,official_source
+2026-09-18,Hiroshima Carp,Hanshin Tigers,spread,Hanshin Tigers,1-20,1,2,3,PARTIAL_LOSS,1000,-200,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Hiroshima Carp,Hanshin Tigers,spread,Hiroshima Carp,1-20,1,2,3,PARTIAL_WIN,1000,+190,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Hiroshima Carp,Hanshin Tigers,total,over,6-50,1,2,3,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Hiroshima Carp,Hanshin Tigers,total,under,6-50,1,2,3,WIN,1000,+930,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Tokyo Yakult Swallows,Yokohama DeNA BayStars,spread,Yokohama DeNA BayStars,1+30,3,1,4,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Tokyo Yakult Swallows,Yokohama DeNA BayStars,spread,Tokyo Yakult Swallows,1+30,3,1,4,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Tokyo Yakult Swallows,Yokohama DeNA BayStars,total,over,7平,3,1,4,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Tokyo Yakult Swallows,Yokohama DeNA BayStars,total,under,7平,3,1,4,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Chunichi Dragons,Yomiuri Giants,spread,Yomiuri Giants,1平,0,2,2,WIN,1000,+920,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Chunichi Dragons,Yomiuri Giants,spread,Chunichi Dragons,1平,0,2,2,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Chunichi Dragons,Yomiuri Giants,total,over,6+25,0,2,2,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260918.html
+2026-09-18,Chunichi Dragons,Yomiuri Giants,total,under,6+25,0,2,2,WIN,1000,+960,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260918.html
