@@ -1,0 +1,23 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,prospective,official_source
+2026-09-19,Orix Buffaloes,Hokkaido Nippon-Ham Fighters,spread,Hokkaido Nippon-Ham Fighters,1+30,7,4,11,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Orix Buffaloes,Hokkaido Nippon-Ham Fighters,spread,Orix Buffaloes,1+30,7,4,11,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Orix Buffaloes,Hokkaido Nippon-Ham Fighters,total,over,7+50,7,4,11,WIN,1000,+930,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Orix Buffaloes,Hokkaido Nippon-Ham Fighters,total,under,7+50,7,4,11,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Fukuoka SoftBank Hawks,Tohoku Rakuten Golden Eagles,spread,Fukuoka SoftBank Hawks,1-60,2,5,7,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Fukuoka SoftBank Hawks,Tohoku Rakuten Golden Eagles,spread,Tohoku Rakuten Golden Eagles,1-60,2,5,7,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Fukuoka SoftBank Hawks,Tohoku Rakuten Golden Eagles,total,over,8+75,2,5,7,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Fukuoka SoftBank Hawks,Tohoku Rakuten Golden Eagles,total,under,8+75,2,5,7,WIN,1000,+930,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Chunichi Dragons,Yomiuri Giants,spread,Yomiuri Giants,1-20,1,14,15,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Chunichi Dragons,Yomiuri Giants,spread,Chunichi Dragons,1-20,1,14,15,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Chunichi Dragons,Yomiuri Giants,total,over,7-50,1,14,15,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Chunichi Dragons,Yomiuri Giants,total,under,7-50,1,14,15,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Saitama Seibu Lions,Chiba Lotte Marines,total,over,7+75,4,2,6,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Saitama Seibu Lions,Chiba Lotte Marines,total,under,7+75,4,2,6,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Hiroshima Carp,Hanshin Tigers,spread,Hanshin Tigers,1+40,5,1,6,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Hiroshima Carp,Hanshin Tigers,spread,Hiroshima Carp,1+40,5,1,6,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Hiroshima Carp,Hanshin Tigers,total,over,5+50,5,1,6,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Hiroshima Carp,Hanshin Tigers,total,under,5+50,5,1,6,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Tokyo Yakult Swallows,Yokohama DeNA BayStars,spread,Yokohama DeNA BayStars,1+30,3,5,8,WIN,1000,+950,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Tokyo Yakult Swallows,Yokohama DeNA BayStars,spread,Tokyo Yakult Swallows,1+30,3,5,8,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Tokyo Yakult Swallows,Yokohama DeNA BayStars,total,over,7+25,3,5,8,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
+2026-09-19,Tokyo Yakult Swallows,Yokohama DeNA BayStars,total,under,7+25,3,5,8,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260919.html
