@@ -7,21 +7,20 @@
     "start_time": "18:00"
   },
   "model": {
-    "away_mu": 4.1084,
-    "home_mu": 3.3062,
-    "dispersion": 2.9238670286257475,
-    "final_draw_share": 0.1632511784257028,
+    "away_mu": 3.4582,
+    "home_mu": 3.2035,
+    "dispersion": 2.9124510156335446,
+    "final_draw_share": 0.1624034944612308,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 7.415,
+    "expected_total": 6.662,
     "park_factor": 1.0346,
     "league_runs_per_game": 3.7957,
-    "away_starter": null,
-    "home_starter": null,
+    "away_starter": "隅田 知一郎",
+    "home_starter": "高野 脩汰",
     "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
+      "home starter 高野 脩汰 pitches 1.72 innings an outing over 29 appearances; the projection still hands them a starter's share of the game, which flatters this side"
     ]
   },
   "market": {
@@ -35,16 +34,14 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,
