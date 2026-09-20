@@ -7,22 +7,19 @@
     "start_time": "18:00"
   },
   "model": {
-    "away_mu": 4.1078,
-    "home_mu": 3.3066,
-    "dispersion": 2.9124510156335446,
-    "final_draw_share": 0.1624034944612308,
+    "away_mu": 3.5789,
+    "home_mu": 3.4907,
+    "dispersion": 2.9064762453492587,
+    "final_draw_share": 0.16143484616461584,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 7.414,
-    "park_factor": 1.0346,
-    "league_runs_per_game": 3.7957,
-    "away_starter": null,
-    "home_starter": null,
-    "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
-    ]
+    "expected_total": 7.07,
+    "park_factor": 1.0323,
+    "league_runs_per_game": 3.7972,
+    "away_starter": "武内 夏暉",
+    "home_starter": "ジャクソン",
+    "notes": []
   },
   "market": {
     "_comment": "FILL IN FROM YOUR PLATFORM. No price is inferred.",
@@ -35,16 +32,14 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,
