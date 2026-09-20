@@ -162,7 +162,17 @@ class PricedMarket:
 
 def read_board(path: Path | str) -> list[BoardGame]:
     """Read a board CSV. Team names may be Chinese, Japanese or English."""
-    rows = list(csv.DictReader(Path(path).read_text(encoding="utf-8").splitlines()))
+    return read_board_text(Path(path).read_text(encoding="utf-8"))
+
+
+def read_board_text(text: str) -> list[BoardGame]:
+    """Read a board from CSV text.
+
+    Split out from ``read_board`` so a historical version of a board can be
+    read straight out of git, which is how each row's own commit time is
+    found when a board arrives in more than one piece.
+    """
+    rows = list(csv.DictReader(text.splitlines()))
     if not rows:
         raise BoardError("board file has no rows")
     missing = REQUIRED_COLUMNS - set(rows[0])

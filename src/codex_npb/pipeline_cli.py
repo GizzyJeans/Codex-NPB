@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from .backtest import backtest
-from .board import price_board, read_board
+from .board import price_board, read_board, read_board_text
 from .ledger import append as ledger_append
 from .track_record import collect
 from .settlement import (
@@ -305,6 +305,11 @@ def settle_main(argv: list[str] | None = None) -> int:
     # The board's own commit is the authority on when the day was priced;
     # the record's integrity rests on version control, not on a claim.
     priced_at = args.priced_at or _board_commit_time(args.board)
+    # A board can arrive in pieces; each row is as old as the commit that
+    # introduced it, not as old as the file's newest edit.
+    priced_at_by_game = (
+        {} if args.priced_at else _board_row_commit_times(args.board)
+    )
     first_pitch = {
         key: first_pitch_utc(target, entry["game"].get("start_time", ""))
         for key, entry in projections.items()
@@ -316,6 +321,7 @@ def settle_main(argv: list[str] | None = None) -> int:
         shadow_stake=args.shadow_stake,
         first_pitch=first_pitch,
         priced_at=priced_at,
+        priced_at_by_game=priced_at_by_game,
         cancelled=cancelled,
     )
     summary = summarize(settled)
@@ -484,6 +490,49 @@ def _board_commit_time(board: Path) -> datetime | None:
         return datetime.fromisoformat(stamp).astimezone(timezone.utc)
     except ValueError:
         return None
+
+
+def _board_row_commit_times(board: Path) -> dict[tuple[str, str], datetime]:
+    """When each game's row first appeared in the board file, from git.
+
+    ``_board_commit_time`` answers for the whole file, which is wrong as soon
+    as a board arrives in pieces: appending the evening games moves the
+    file's last-commit time past the afternoon games' first pitch and would
+    mark rows prospective that plainly were. A row's price is as old as the
+    commit that introduced it, so walk the file's history oldest-first and
+    keep the first commit in which each game appears.
+
+    Returns an empty mapping when git is unavailable, leaving callers on the
+    whole-file timestamp they used before.
+    """
+    try:
+        log = subprocess.run(
+            ["git", "log", "--reverse", "--format=%H %cI", "--", str(board)],
+            capture_output=True, text=True, timeout=20, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    if not log:
+        return {}
+
+    times: dict[tuple[str, str], datetime] = {}
+    for line in log.splitlines():
+        sha, _, stamp = line.partition(" ")
+        try:
+            when = datetime.fromisoformat(stamp.strip()).astimezone(timezone.utc)
+            blob = subprocess.run(
+                ["git", "show", f"{sha}:{board}"],
+                capture_output=True, text=True, timeout=20, check=True,
+            ).stdout
+        except (OSError, ValueError, subprocess.SubprocessError):
+            continue
+        try:
+            rows = read_board_text(blob)
+        except Exception:
+            continue
+        for game in rows:
+            times.setdefault((game.away, game.home), when)
+    return times
 
 
 def _pending_settlements(boards: Path, records: Path, before: date) -> list[date]:

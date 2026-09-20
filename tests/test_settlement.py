@@ -58,6 +58,18 @@ def priced(market, selection, line, odds, status="WATCH", ev=0.2):
     )
 
 
+def priced_market_for(game, market, selection, line, odds):
+    """A PricedMarket for an arbitrary board game, for timing tests."""
+    return PricedMarket(
+        game_date=game.game_date, away=game.away, home=game.home,
+        market=market, selection=selection, line=line, hong_kong_odds=odds,
+        model_probability=0.55, market_no_vig_probability=0.5,
+        expected_value=0.1, fair_decimal_odds=1.8, minimum_decimal_odds=1.9,
+        status="WATCH", recommended_stake=0.0, outcome_probabilities={},
+        model_expectation=6.2, line_expectation=6.0,
+    )
+
+
 class SettleBoardTests(unittest.TestCase):
     def test_underdog_wins_outright_against_a_one_run_handicap(self):
         rows = settle_board(
@@ -379,3 +391,84 @@ class ProjectionOriginTests(unittest.TestCase):
         # Older callers pass neither, and must keep their existing behaviour.
         rows = self.rows()
         self.assertEqual(set(rows.values()), {"prospective_pre_first_pitch"})
+
+
+class PieceworkBoardTests(unittest.TestCase):
+    """A board that arrives in pieces must not age its earlier rows.
+
+    On 2026-09-20 only the three 14:00 JST games were published in time.
+    Appending the 18:00 games later moves the file's last-commit time past
+    05:00 UTC, and a single whole-file priced_at would then declare the
+    afternoon games priced after their own first pitch -- losing three honest
+    rows to a bookkeeping artefact.
+    """
+
+    AWAY, HOME = "Orix Buffaloes", "Hokkaido Nippon-Ham Fighters"
+    EVE_AWAY, EVE_HOME = "Hiroshima Carp", "Chunichi Dragons"
+
+    def markets(self):
+        early = BoardGame(
+            game_date="2026-09-20", away=self.AWAY, home=self.HOME,
+            favorite=self.HOME, handicap="2+35", handicap_odds=0.95,
+            total_line="8平", total_odds=0.93,
+        )
+        evening = BoardGame(
+            game_date="2026-09-20", away=self.EVE_AWAY, home=self.EVE_HOME,
+            favorite=self.EVE_HOME, handicap="1平", handicap_odds=0.95,
+            total_line="6平", total_odds=0.93,
+        )
+        return early, evening
+
+    def settle(self, **kwargs):
+        early, evening = self.markets()
+        priced = [
+            priced_market_for(early, "total", "under", "8平", 0.93),
+            priced_market_for(evening, "total", "under", "6平", 0.93),
+        ]
+        rows = settle_board(
+            priced, [early, evening],
+            {(self.AWAY, self.HOME): FakeResult(1, 2),
+             (self.EVE_AWAY, self.EVE_HOME): FakeResult(1, 2)},
+            first_pitch={
+                (self.AWAY, self.HOME): first_pitch_utc(date(2026, 9, 20), "14:00"),
+                (self.EVE_AWAY, self.EVE_HOME): first_pitch_utc(date(2026, 9, 20), "18:00"),
+            },
+            **kwargs,
+        )
+        return {(r.market.away, r.market.home): r.prospective for r in rows}
+
+    def test_whole_file_timestamp_would_have_condemned_the_early_game(self):
+        # The evening commit lands at 06:00 UTC, after the 05:00 first pitch.
+        flags = self.settle(priced_at=datetime(2026, 9, 20, 6, 0, tzinfo=timezone.utc))
+        self.assertFalse(flags[(self.AWAY, self.HOME)],
+                         "this is the behaviour the per-row fix exists to avoid")
+        self.assertTrue(flags[(self.EVE_AWAY, self.EVE_HOME)])
+
+    def test_per_row_timestamps_keep_each_game_honest(self):
+        flags = self.settle(
+            priced_at=datetime(2026, 9, 20, 6, 0, tzinfo=timezone.utc),
+            priced_at_by_game={
+                (self.AWAY, self.HOME): datetime(2026, 9, 20, 3, 24, tzinfo=timezone.utc),
+                (self.EVE_AWAY, self.EVE_HOME): datetime(2026, 9, 20, 6, 0, tzinfo=timezone.utc),
+            },
+        )
+        self.assertTrue(flags[(self.AWAY, self.HOME)], "priced 03:24, starts 05:00")
+        self.assertTrue(flags[(self.EVE_AWAY, self.EVE_HOME)], "priced 06:00, starts 09:00")
+
+    def test_a_genuinely_late_row_is_still_caught(self):
+        # Per-row timing is not an amnesty: a row added after its own first
+        # pitch stays non-prospective.
+        flags = self.settle(
+            priced_at=datetime(2026, 9, 20, 3, 24, tzinfo=timezone.utc),
+            priced_at_by_game={
+                (self.AWAY, self.HOME): datetime(2026, 9, 20, 5, 30, tzinfo=timezone.utc),
+            },
+        )
+        self.assertFalse(flags[(self.AWAY, self.HOME)])
+
+    def test_games_not_named_fall_back_to_the_file_timestamp(self):
+        flags = self.settle(
+            priced_at=datetime(2026, 9, 20, 3, 24, tzinfo=timezone.utc),
+            priced_at_by_game={},
+        )
+        self.assertTrue(all(flags.values()))

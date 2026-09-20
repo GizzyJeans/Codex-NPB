@@ -79,6 +79,7 @@ def settle_board(
     actual_stakes: Mapping[tuple[str, str, str, str], float] | None = None,
     first_pitch: Mapping[tuple[str, str], datetime | None] | None = None,
     priced_at: datetime | None = None,
+    priced_at_by_game: Mapping[tuple[str, str], datetime | None] | None = None,
     cancelled: Iterable[tuple[str, str]] | None = None,
 ) -> list[SettledMarket]:
     """Grade every priced market against the official score.
@@ -96,17 +97,31 @@ def settle_board(
     on it do not all start together: a 13:00 JST game can be under way while
     the 18:00 ones are hours off. Marking the whole day prospective because
     most of it was would overstate the record.
+
+    ``priced_at_by_game`` overrides ``priced_at`` for the games it names, and
+    exists because a board can arrive in pieces. On 2026-09-20 only the three
+    14:00 JST games were published in time; adding the evening three later
+    moves the file's own last-commit time forward, and a single whole-file
+    ``priced_at`` would then declare the early games priced after their own
+    first pitch. A row is as old as the commit that introduced it, not as old
+    as the newest edit to the file it lives in.
     """
     favorites = {(game.away, game.home): game.favorite for game in games}
     actual_stakes = actual_stakes or {}
     cancelled_games = set(cancelled or ())
     settled: list[SettledMarket] = []
 
+    def priced_for(key: tuple[str, str]) -> datetime | None:
+        """When this game's row was priced, preferring its own timestamp."""
+        by_game = priced_at_by_game or {}
+        return by_game[key] if key in by_game else priced_at
+
     for entry in priced:
         key = (entry.away, entry.home)
         result = results.get(key)
         if result is None and key in cancelled_games:
             start = (first_pitch or {}).get(key)
+            priced = priced_for(key)
             settled.append(
                 SettledMarket(
                     market=entry,
@@ -119,7 +134,7 @@ def settle_board(
                         (entry.away, entry.home, entry.market, entry.selection), 0.0
                     ),
                     prospective=(
-                        True if priced_at is None or start is None else priced_at < start
+                        True if priced is None or start is None else priced < start
                     ),
                 )
             )
@@ -146,8 +161,9 @@ def settle_board(
 
         outcome = market.settle(result.away_score, result.home_score)
         start = (first_pitch or {}).get(key)
+        priced = priced_for(key)
         prospective = (
-            True if priced_at is None or start is None else priced_at < start
+            True if priced is None or start is None else priced < start
         )
         settled.append(
             SettledMarket(
