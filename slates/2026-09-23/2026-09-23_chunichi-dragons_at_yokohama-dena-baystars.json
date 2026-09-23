@@ -7,21 +7,20 @@
     "start_time": "18:00"
   },
   "model": {
-    "away_mu": 3.5922,
-    "home_mu": 4.0726,
-    "dispersion": 2.9210618367696455,
-    "final_draw_share": 0.16008440709831578,
+    "away_mu": 3.4901,
+    "home_mu": 4.7868,
+    "dispersion": 2.9518336280774915,
+    "final_draw_share": 0.1591083540834288,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 7.665,
-    "park_factor": 1.0523,
-    "league_runs_per_game": 3.4065,
-    "away_starter": null,
-    "home_starter": null,
+    "expected_total": 8.277,
+    "park_factor": 1.0556,
+    "league_runs_per_game": 3.4171,
+    "away_starter": "仲地 礼亜",
+    "home_starter": "深沢 鳳介",
     "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
+      "away starter 仲地 礼亜 pitches 1.75 innings an outing over 4 appearances; the projection still hands them a starter's share of the game, which flatters this side"
     ]
   },
   "market": {
@@ -35,16 +34,15 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
+    "away starter 仲地 礼亜 has only 7.0 IP this season",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,

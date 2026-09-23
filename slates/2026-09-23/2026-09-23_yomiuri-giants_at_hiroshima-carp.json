@@ -7,22 +7,19 @@
     "start_time": "15:00"
   },
   "model": {
-    "away_mu": 3.4543,
-    "home_mu": 2.8077,
-    "dispersion": 2.9210618367696455,
-    "final_draw_share": 0.16008440709831578,
+    "away_mu": 3.3548,
+    "home_mu": 3.0478,
+    "dispersion": 2.9518336280774915,
+    "final_draw_share": 0.1591083540834288,
     "max_runs": 24
   },
   "projection_detail": {
-    "expected_total": 6.262,
-    "park_factor": 0.9709,
-    "league_runs_per_game": 3.4065,
-    "away_starter": null,
-    "home_starter": null,
-    "notes": [
-      "away starter unknown; club rotation rate used in its place",
-      "home starter unknown; club rotation rate used in its place"
-    ]
+    "expected_total": 6.403,
+    "park_factor": 0.9659,
+    "league_runs_per_game": 3.4171,
+    "away_starter": "竹丸 和幸",
+    "home_starter": "床田 寛樹",
+    "notes": []
   },
   "market": {
     "_comment": "FILL IN FROM YOUR PLATFORM. No price is inferred.",
@@ -35,16 +32,14 @@
   },
   "eligibility": {
     "rules_confirmed": false,
-    "starters_confirmed": false,
+    "starters_confirmed": true,
     "lineups_confirmed": false,
-    "data_complete": false,
+    "data_complete": true,
     "market_current": false
   },
   "blocking_conditions": [
     "platform tail-line rules unconfirmed",
     "market price not supplied",
-    "away starter not announced yet",
-    "home starter not announced yet",
     "official lineups not published at projection time"
   ],
   "bankroll": 100000,
