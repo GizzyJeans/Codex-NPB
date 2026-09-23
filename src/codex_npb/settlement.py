@@ -299,6 +299,7 @@ def write_projections(
     first_pitch: Mapping[tuple[str, str], datetime | None] | None = None,
     priced_at: datetime | None = None,
     priced_games: Collection[tuple[str, str]] | None = None,
+    priced_at_by_game: Mapping[tuple[str, str], datetime | None] | None = None,
 ) -> Path:
     """Write one row per projected game, each stamped with its own origin.
 
@@ -328,9 +329,16 @@ def write_projections(
             detail = entry.get("projection_detail", {})
             model = entry["model"]
             start = (first_pitch or {}).get(key)
+            # Same rule settle_board uses: a game's row is as old as the
+            # commit that introduced it. Without this, a board completed in
+            # a second commit stamps its first batch post_hoc here even while
+            # settle_board correctly records the same games as prospective --
+            # which is what the 2026-09-20 and 2026-09-23 files show.
+            by_game = priced_at_by_game or {}
+            priced = by_game[key] if key in by_game else priced_at
             if priced_games is not None and key not in priced_games:
                 origin = "not_priced"
-            elif priced_at is not None and start is not None and priced_at >= start:
+            elif priced is not None and start is not None and priced >= start:
                 origin = "post_hoc"
             else:
                 origin = record_origin

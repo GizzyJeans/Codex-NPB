@@ -376,6 +376,7 @@ def settle_main(argv: list[str] | None = None) -> int:
         first_pitch=first_pitch,
         priced_at=priced_at,
         priced_games={(game.away, game.home) for game in games},
+        priced_at_by_game=priced_at_by_game,
     )
     write_candidates(settled, directory / "candidates.csv")
     write_settlements(settled, directory / "settlements.csv", official_source=source)

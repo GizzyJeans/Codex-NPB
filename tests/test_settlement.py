@@ -472,3 +472,73 @@ class PieceworkBoardTests(unittest.TestCase):
             priced_at_by_game={},
         )
         self.assertTrue(all(flags.values()))
+
+
+class PieceworkProjectionOriginTests(unittest.TestCase):
+    """write_projections must use the same per-row times settle_board does.
+
+    Per-row pricing times reached settle_board on 2026-09-20 but not
+    write_projections, so on 09-20 and again on 09-23 the afternoon games of
+    a two-commit board were stamped post_hoc in game_projections.csv while
+    settlements.csv, correctly, recorded the very same games as prospective.
+    The two files of one day disagreed about when the day was priced.
+    """
+
+    EARLY = ("Hanshin Tigers", "Tokyo Yakult Swallows")
+    LATE = ("Orix Buffaloes", "Chiba Lotte Marines")
+
+    def origins(self, **kwargs):
+        import csv as _csv
+        import tempfile
+        from pathlib import Path as _Path
+        from codex_npb.settlement import write_projections
+
+        def entry(key, start):
+            return {
+                "game": {"date": "2026-09-23", "away": key[0], "home": key[1],
+                         "start_time": start},
+                "model": {"away_mu": 4.0, "home_mu": 3.3},
+                "projection_detail": {"away_starter": "a", "home_starter": "b",
+                                      "park_factor": 1.0},
+            }
+
+        projections = {self.EARLY: entry(self.EARLY, "14:00"),
+                       self.LATE: entry(self.LATE, "17:00")}
+        first_pitch = {
+            k: first_pitch_utc(date(2026, 9, 23), v["game"]["start_time"])
+            for k, v in projections.items()
+        }
+        keep = tempfile.TemporaryDirectory()
+        path = write_projections(
+            projections, {}, _Path(keep.name) / "p.csv",
+            model_version="v", record_origin="prospective_pre_first_pitch",
+            first_pitch=first_pitch, priced_games=set(projections),
+            # The file's last commit, when the evening rows were appended.
+            priced_at=datetime(2026, 9, 23, 7, 43, 18, tzinfo=timezone.utc),
+            **kwargs,
+        )
+        rows = {(r["away"], r["home"]): r["record_origin"]
+                for r in _csv.DictReader(path.read_text(encoding="utf-8").splitlines())}
+        keep.cleanup()
+        return rows
+
+    def test_whole_file_time_mislabels_the_first_batch(self):
+        # The defect as it shipped: no per-row times reach the writer.
+        rows = self.origins()
+        self.assertEqual(rows[self.EARLY], "post_hoc",
+                         "this is the mislabel the per-row times exist to prevent")
+        self.assertEqual(rows[self.LATE], "prospective_pre_first_pitch")
+
+    def test_per_row_times_label_both_batches_correctly(self):
+        rows = self.origins(priced_at_by_game={
+            self.EARLY: datetime(2026, 9, 23, 2, 21, 45, tzinfo=timezone.utc),
+            self.LATE: datetime(2026, 9, 23, 7, 43, 18, tzinfo=timezone.utc),
+        })
+        self.assertEqual(rows[self.EARLY], "prospective_pre_first_pitch")
+        self.assertEqual(rows[self.LATE], "prospective_pre_first_pitch")
+
+    def test_a_row_committed_after_its_own_first_pitch_is_still_post_hoc(self):
+        rows = self.origins(priced_at_by_game={
+            self.EARLY: datetime(2026, 9, 23, 5, 30, tzinfo=timezone.utc),
+        })
+        self.assertEqual(rows[self.EARLY], "post_hoc")
