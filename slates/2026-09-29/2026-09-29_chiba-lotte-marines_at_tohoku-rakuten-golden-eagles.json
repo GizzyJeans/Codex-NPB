@@ -1,0 +1,49 @@
+{
+  "game": {
+    "date": "2026-09-29",
+    "away": "Chiba Lotte Marines",
+    "home": "Tohoku Rakuten Golden Eagles",
+    "venue": "楽天モバイル",
+    "start_time": "18:00"
+  },
+  "model": {
+    "away_mu": 3.7829,
+    "home_mu": 4.0074,
+    "dispersion": 2.960674849318151,
+    "final_draw_share": 0.15421425378343173,
+    "max_runs": 24
+  },
+  "projection_detail": {
+    "expected_total": 7.79,
+    "park_factor": 1.0241,
+    "league_runs_per_game": 3.8177,
+    "away_starter": "吉川 悠斗",
+    "home_starter": "伊藤 樹",
+    "notes": []
+  },
+  "market": {
+    "_comment": "FILL IN FROM YOUR PLATFORM. No price is inferred.",
+    "kind": "spread",
+    "favorite": null,
+    "selection": null,
+    "line": null,
+    "hong_kong_odds": null,
+    "opposite_hk_odds": null
+  },
+  "eligibility": {
+    "rules_confirmed": false,
+    "starters_confirmed": true,
+    "lineups_confirmed": false,
+    "data_complete": true,
+    "market_current": false
+  },
+  "blocking_conditions": [
+    "platform tail-line rules unconfirmed",
+    "market price not supplied",
+    "away starter 吉川 悠斗 has only 9.0 IP this season",
+    "official lineups not published at projection time"
+  ],
+  "bankroll": 100000,
+  "max_stake": 1000,
+  "kelly_fraction": 0.25
+}
