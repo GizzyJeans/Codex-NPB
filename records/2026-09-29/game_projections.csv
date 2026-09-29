@@ -1,0 +1,5 @@
+date,away,home,away_mu,home_mu,expected_total,away_starter,home_starter,park_factor,actual_away_score,actual_home_score,actual_total,model_version,record_origin
+2026-09-29,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,3.7829,4.0074,7.790,吉川 悠斗,伊藤 樹,1.0241,6,3,9,npb-pipeline-v0.2,prospective_pre_first_pitch
+2026-09-29,Hiroshima Carp,Yomiuri Giants,2.7213,3.2070,5.928,玉村 昇悟,戸郷 翔征,0.9527,1,3,4,npb-pipeline-v0.2,prospective_pre_first_pitch
+2026-09-29,Orix Buffaloes,Saitama Seibu Lions,2.4509,4.0016,6.452,東松 快征,平良 海馬,0.9775,1,2,3,npb-pipeline-v0.2,prospective_pre_first_pitch
+2026-09-29,Tokyo Yakult Swallows,Hanshin Tigers,2.5226,3.2410,5.764,中村 優斗,大竹 耕太郎,0.8245,,,,npb-pipeline-v0.2,prospective_pre_first_pitch

@@ -1,0 +1,17 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-09-29,Tokyo Yakult Swallows,Hanshin Tigers,spread,Hanshin Tigers,1-50,0.950,0.4199,0.5000,2.381,-0.1632,2.487,0.718,1.250,-0.532,PASS,0,true
+2026-09-29,Tokyo Yakult Swallows,Hanshin Tigers,spread,Tokyo Yakult Swallows,1-50,0.950,0.5801,0.5000,1.724,0.1181,1.800,0.718,1.250,-0.532,WATCH,0,true
+2026-09-29,Tokyo Yakult Swallows,Hanshin Tigers,total,over,6-25,0.930,0.4080,0.5000,2.451,-0.1979,2.556,5.764,6.125,-0.361,PASS,0,true
+2026-09-29,Tokyo Yakult Swallows,Hanshin Tigers,total,under,6-25,0.930,0.5920,0.5000,1.689,0.1327,1.762,5.764,6.125,-0.361,WATCH,0,true
+2026-09-29,Orix Buffaloes,Saitama Seibu Lions,spread,Saitama Seibu Lions,1-65,0.950,0.5049,0.5000,1.981,-0.0145,2.066,1.551,1.325,+0.226,PASS,0,true
+2026-09-29,Orix Buffaloes,Saitama Seibu Lions,spread,Orix Buffaloes,1-65,0.950,0.4951,0.5000,2.020,-0.0322,2.106,1.551,1.325,+0.226,PASS,0,true
+2026-09-29,Orix Buffaloes,Saitama Seibu Lions,total,over,6.5,0.930,0.4535,0.5000,2.205,-0.1248,2.293,6.452,6.500,-0.048,PASS,0,true
+2026-09-29,Orix Buffaloes,Saitama Seibu Lions,total,under,6.5,0.930,0.5465,0.5000,1.830,0.0548,1.903,6.452,6.500,-0.048,WATCH,0,true
+2026-09-29,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,spread,Tohoku Rakuten Golden Eagles,1+20,0.950,0.4452,0.5000,2.246,-0.1158,2.349,0.224,0.900,-0.676,PASS,0,true
+2026-09-29,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,spread,Chiba Lotte Marines,1+20,0.950,0.5548,0.5000,1.802,0.0719,1.885,0.224,0.900,-0.676,WATCH,0,true
+2026-09-29,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,total,over,7-50,0.930,0.4990,0.5000,2.004,-0.0348,2.089,7.790,7.250,+0.540,PASS,0,true
+2026-09-29,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,total,under,7-50,0.930,0.5010,0.5000,1.996,-0.0311,2.081,7.790,7.250,+0.540,PASS,0,true
+2026-09-29,Hiroshima Carp,Yomiuri Giants,spread,Yomiuri Giants,1+35,0.950,0.4833,0.5000,2.069,-0.0505,2.164,0.486,0.825,-0.339,PASS,0,true
+2026-09-29,Hiroshima Carp,Yomiuri Giants,spread,Hiroshima Carp,1+35,0.950,0.5167,0.5000,1.935,0.0067,2.024,0.486,0.825,-0.339,PASS,0,true
+2026-09-29,Hiroshima Carp,Yomiuri Giants,total,over,6+50,0.930,0.4665,0.5000,2.143,-0.0950,2.233,5.928,5.750,+0.178,PASS,0,true
+2026-09-29,Hiroshima Carp,Yomiuri Giants,total,under,6+50,0.930,0.5335,0.5000,1.875,0.0282,1.953,5.928,5.750,+0.178,PASS,0,true
