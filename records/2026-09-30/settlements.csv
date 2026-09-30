@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,prospective,official_source
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,spread,Hanshin Tigers,2+50,0,5,5,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,spread,Tokyo Yakult Swallows,2+50,0,5,5,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,total,over,5-75,0,5,5,PARTIAL_LOSS,1000,-750,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,total,under,5-75,0,5,5,PARTIAL_WIN,1000,+698,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,spread,Tohoku Rakuten Golden Eagles,1+30,0,3,3,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,spread,Chiba Lotte Marines,1+30,0,3,3,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,total,over,6-50,0,3,3,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20260930.html
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,total,under,6-50,0,3,3,WIN,1000,+980,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20260930.html

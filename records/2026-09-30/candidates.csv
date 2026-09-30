@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,spread,Hanshin Tigers,2+50,0.950,0.3581,0.5000,2.793,-0.2836,2.912,0.956,1.750,-0.794,PASS,0,true
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,spread,Tokyo Yakult Swallows,2+50,0.950,0.6419,0.5000,1.558,0.2367,1.624,0.956,1.750,-0.794,WATCH,0,true
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,total,over,5-75,0.930,0.4217,0.5000,2.371,-0.1786,2.470,5.215,5.375,-0.160,PASS,0,true
+2026-09-30,Tokyo Yakult Swallows,Hanshin Tigers,total,under,5-75,0.930,0.5783,0.5000,1.729,0.1114,1.801,5.215,5.375,-0.160,WATCH,0,true
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,spread,Tohoku Rakuten Golden Eagles,1+30,0.950,0.3745,0.5000,2.670,-0.2414,2.790,-0.509,0.850,-1.359,PASS,0,true
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,spread,Chiba Lotte Marines,1+30,0.950,0.6255,0.5000,1.599,0.1967,1.670,-0.509,0.850,-1.359,WATCH,0,true
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,total,over,6-50,0.880,0.5672,0.5130,1.763,0.0634,1.837,7.305,6.250,+1.055,WATCH,0,true
+2026-09-30,Chiba Lotte Marines,Tohoku Rakuten Golden Eagles,total,under,6-50,0.980,0.4328,0.4870,2.310,-0.1368,2.407,7.305,6.250,+1.055,PASS,0,true
