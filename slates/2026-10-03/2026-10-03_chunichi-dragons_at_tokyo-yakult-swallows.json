@@ -1,0 +1,48 @@
+{
+  "game": {
+    "date": "2026-10-03",
+    "away": "Chunichi Dragons",
+    "home": "Tokyo Yakult Swallows",
+    "venue": "神宮",
+    "start_time": "18:00"
+  },
+  "model": {
+    "away_mu": 4.1099,
+    "home_mu": 3.8622,
+    "dispersion": 2.964422420664699,
+    "final_draw_share": 0.16193101897941994,
+    "max_runs": 24
+  },
+  "projection_detail": {
+    "expected_total": 7.972,
+    "park_factor": 1.2036,
+    "league_runs_per_game": 3.4133,
+    "away_starter": "髙橋 宏斗",
+    "home_starter": "高梨 裕稔",
+    "notes": []
+  },
+  "market": {
+    "_comment": "FILL IN FROM YOUR PLATFORM. No price is inferred.",
+    "kind": "spread",
+    "favorite": null,
+    "selection": null,
+    "line": null,
+    "hong_kong_odds": null,
+    "opposite_hk_odds": null
+  },
+  "eligibility": {
+    "rules_confirmed": false,
+    "starters_confirmed": true,
+    "lineups_confirmed": false,
+    "data_complete": true,
+    "market_current": false
+  },
+  "blocking_conditions": [
+    "platform tail-line rules unconfirmed",
+    "market price not supplied",
+    "official lineups not published at projection time"
+  ],
+  "bankroll": 100000,
+  "max_stake": 1000,
+  "kelly_fraction": 0.25
+}
