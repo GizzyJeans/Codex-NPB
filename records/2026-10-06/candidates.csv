@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-10-06,Saitama Seibu Lions,Chiba Lotte Marines,spread,Saitama Seibu Lions,1+50,0.950,0.4287,0.5000,2.333,-0.1510,2.434,-0.154,0.750,-0.904,PASS,0,true
+2026-10-06,Saitama Seibu Lions,Chiba Lotte Marines,spread,Chiba Lotte Marines,1+50,0.950,0.5713,0.5000,1.750,0.1050,1.826,-0.154,0.750,-0.904,WATCH,0,true
+2026-10-06,Saitama Seibu Lions,Chiba Lotte Marines,total,over,7+50,0.930,0.4819,0.5000,2.075,-0.0657,2.163,6.994,6.750,+0.244,PASS,0,true
+2026-10-06,Saitama Seibu Lions,Chiba Lotte Marines,total,under,7+50,0.930,0.5181,0.5000,1.930,-0.0001,2.012,6.994,6.750,+0.244,PASS,0,true
+2026-10-06,Hiroshima Carp,Hanshin Tigers,spread,Hanshin Tigers,1+10,0.950,0.4716,0.5000,2.121,-0.0657,2.224,0.633,0.950,-0.317,PASS,0,true
+2026-10-06,Hiroshima Carp,Hanshin Tigers,spread,Hiroshima Carp,1+10,0.950,0.5284,0.5000,1.892,0.0248,1.985,0.633,0.950,-0.317,PASS,0,true
+2026-10-06,Hiroshima Carp,Hanshin Tigers,total,over,6+25,0.930,0.3991,0.5000,2.506,-0.2140,2.613,5.496,5.875,-0.379,PASS,0,true
+2026-10-06,Hiroshima Carp,Hanshin Tigers,total,under,6+25,0.930,0.6009,0.5000,1.664,0.1488,1.736,5.496,5.875,-0.379,WATCH,0,true
