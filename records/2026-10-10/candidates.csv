@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,spread,Saitama Seibu Lions,1-25,0.950,0.5198,0.5000,1.924,0.0118,2.013,1.321,1.125,+0.196,PASS,0,true
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,spread,Hokkaido Nippon-Ham Fighters,1-25,0.950,0.4802,0.5000,2.082,-0.0552,2.178,1.321,1.125,+0.196,PASS,0,true
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,total,over,6+50,0.930,0.5784,0.5000,1.729,0.1111,1.801,6.973,5.750,+1.223,WATCH,0,true
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,total,under,6+50,0.930,0.4216,0.5000,2.372,-0.1780,2.471,6.973,5.750,+1.223,PASS,0,true
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,spread,Yokohama DeNA BayStars,1+70,0.950,0.4555,0.5000,2.196,-0.1057,2.288,-0.033,0.650,-0.683,PASS,0,true
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,spread,Yomiuri Giants,1+70,0.950,0.5445,0.5000,1.836,0.0585,1.914,-0.033,0.650,-0.683,WATCH,0,true
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,total,over,5+25,0.930,0.5944,0.5000,1.682,0.1303,1.758,5.894,4.875,+1.019,WATCH,0,true
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,total,under,5+25,0.930,0.4056,0.5000,2.466,-0.1922,2.577,5.894,4.875,+1.019,PASS,0,true

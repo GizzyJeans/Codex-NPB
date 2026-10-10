@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,prospective,official_source
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,spread,Saitama Seibu Lions,1-25,2,3,5,PARTIAL_LOSS,1000,-250,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,spread,Hokkaido Nippon-Ham Fighters,1-25,2,3,5,PARTIAL_WIN,1000,+238,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,total,over,6+50,2,3,5,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Hokkaido Nippon-Ham Fighters,Saitama Seibu Lions,total,under,6+50,2,3,5,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,spread,Yokohama DeNA BayStars,1+70,2,1,3,PARTIAL_WIN,1000,+665,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,spread,Yomiuri Giants,1+70,2,1,3,PARTIAL_LOSS,1000,-700,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,total,over,5+25,2,1,3,LOSS,1000,-1000,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20261010.html
+2026-10-10,Yokohama DeNA BayStars,Yomiuri Giants,total,under,5+25,2,1,3,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261010.html
