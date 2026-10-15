@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,away_score,home_score,total_runs,result,shadow_stake,shadow_pnl,actual_stake,actual_pnl,class_at_analysis,prospective,official_source
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,spread,Fukuoka SoftBank Hawks,1-30,2,6,8,WIN,1000,+950,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,spread,Hokkaido Nippon-Ham Fighters,1-30,2,6,8,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,total,over,6.5,2,6,8,WIN,1000,+930,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,total,under,6.5,2,6,8,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,spread,Hanshin Tigers,1-40,1,0,1,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,spread,Yokohama DeNA BayStars,1-40,1,0,1,WIN,1000,+950,0,+0,WATCH,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,total,over,5+50,1,0,1,LOSS,1000,-1000,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261015.html
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,total,under,5+50,1,0,1,WIN,1000,+930,0,+0,PASS,true,https://npb.jp/bis/2026/games/gm20261015.html

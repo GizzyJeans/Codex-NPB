@@ -1,0 +1,9 @@
+date,away,home,market,selection,line,hk_odds,effective_model_probability,market_no_vig_probability,fair_decimal_odds,ev,minimum_decimal_odds,model_expectation,line_expectation,expectation_gap,class_at_analysis,actual_stake,prospective
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,spread,Fukuoka SoftBank Hawks,1-30,0.950,0.5070,0.5000,1.973,-0.0102,2.061,1.267,1.150,+0.117,PASS,0,true
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,spread,Hokkaido Nippon-Ham Fighters,1-30,0.950,0.4930,0.5000,2.028,-0.0345,2.119,1.267,1.150,+0.117,PASS,0,true
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,total,over,6.5,0.930,0.6286,0.5000,1.591,0.2133,1.654,8.330,6.500,+1.830,WATCH,0,true
+2026-10-15,Hokkaido Nippon-Ham Fighters,Fukuoka SoftBank Hawks,total,under,6.5,0.930,0.3714,0.5000,2.693,-0.2833,2.801,8.330,6.500,+1.830,PASS,0,true
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,spread,Hanshin Tigers,1-40,0.950,0.3945,0.5000,2.535,-0.2022,2.651,0.492,1.200,-0.708,PASS,0,true
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,spread,Yokohama DeNA BayStars,1-40,0.950,0.6055,0.5000,1.651,0.1584,1.727,0.492,1.200,-0.708,WATCH,0,true
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,total,over,5+50,0.930,0.5394,0.5000,1.854,0.0378,1.935,5.301,4.750,+0.551,PASS,0,true
+2026-10-15,Yokohama DeNA BayStars,Hanshin Tigers,total,under,5+50,0.930,0.4606,0.5000,2.171,-0.1022,2.265,5.301,4.750,+0.551,PASS,0,true
