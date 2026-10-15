@@ -54,11 +54,15 @@ def fetch_main(argv: list[str] | None = None) -> int:
     print(f"  teams            {len(bundle.team_seasons)}")
     print(f"  rostered arms    {sum(len(v) for v in bundle.rosters.values())}")
     print(f"  schedule rows    {len(bundle.schedule)}")
-    print(f"  calibrated on    {calibration.games} completed games")
+    print(f"  calibrated on    {calibration.games} completed regular-season games")
     print(f"  runs/team/game   {calibration.runs_per_team_game:.3f}")
     print(f"  dispersion       {calibration.dispersion:.2f}")
     print(f"  home advantage   {calibration.home_field_advantage:.4f}")
     print(f"  final draw share {calibration.final_draw_share:.4f}")
+    if bundle.postseason_dates:
+        print(f"  postseason dates {', '.join(day[5:] for day in bundle.postseason_dates)}")
+    for day in bundle.postseason_unchecked:
+        print(f"  WARNING: could not check whether {day} is a postseason date")
     for warning in calibration.warnings:
         print(f"  WARNING: {warning}")
     return 0
@@ -96,6 +100,9 @@ def slate_main(argv: list[str] | None = None) -> int:
             f"{projection.away_mu:>8.2f}{projection.home_mu:>9.2f}"
             f"{projection.total_mu:>7.2f}  {projection.park_factor:>5.3f}  {starters}"
         )
+    factors = {entry.projection.postseason_run_factor for entry in entries} - {None}
+    for factor in sorted(factors):
+        print(f"\npostseason date: both clubs' expected runs scaled by {factor:.3f}")
 
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)

@@ -20,11 +20,13 @@ from .projection import (
     GameProjection,
     ProjectionSettings,
     TeamSeason,
+    apply_postseason,
     project_game,
 )
 from .roster import StarterMatch, match_starter
 from .staff import StaffSplit, split_all
 from .sources import NPBOfficialClient
+from .sources.npb_official import SourceError, is_postseason_game
 from .teams import TEAMS
 
 SCHEMA_VERSION = 1
@@ -42,6 +44,8 @@ class DataBundle:
     calibration: SeasonCalibration
     schedule: list[dict]
     staff: dict[str, StaffSplit] = field(default_factory=dict)
+    postseason_dates: list[str] = field(default_factory=list)
+    postseason_unchecked: list[str] = field(default_factory=list)
     schema_version: int = SCHEMA_VERSION
 
     def to_json(self) -> dict:
@@ -64,6 +68,8 @@ class DataBundle:
             },
             "schedule": self.schedule,
             "staff": {team: asdict(split) for team, split in self.staff.items()},
+            "postseason_dates": self.postseason_dates,
+            "postseason_unchecked": self.postseason_unchecked,
         }
 
 
@@ -103,6 +109,7 @@ def fetch_bundle(
         for month in months
         for game in _safe_schedule(client, month)
     ]
+    postseason_dates, postseason_unchecked = _postseason_dates(client, schedule)
     return DataBundle(
         year=client.year,
         fetched_at_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -111,6 +118,8 @@ def fetch_bundle(
         calibration=calibration,
         schedule=schedule,
         staff=staff,
+        postseason_dates=postseason_dates,
+        postseason_unchecked=postseason_unchecked,
     )
 
 
@@ -119,6 +128,33 @@ def _safe_schedule(client: NPBOfficialClient, month: int) -> list:
         return client.schedule_for_month(month)
     except Exception:  # a month with no published schedule is not an error
         return []
+
+
+def _postseason_dates(client: NPBOfficialClient, schedule: list[dict]) -> tuple[list[str], list[str]]:
+    """Dates of Climax Series and Japan Series games, plus dates left unchecked.
+
+    A played postseason game is known by its number in the series. An
+    unplayed one has no number yet, so each October or November date that
+    still has a scheduled game is checked against NPB's daily page. A page
+    that cannot be fetched leaves its date unchecked rather than guessed, and
+    the slate says so.
+    """
+    found: set[str] = set()
+    to_check: set[str] = set()
+    for row in schedule:
+        day = date.fromisoformat(row["game_date"])
+        if is_postseason_game(day, row.get("game_number")):
+            found.add(row["game_date"])
+        elif row.get("status") == "scheduled" and day.month >= 10:
+            to_check.add(row["game_date"])
+    unchecked: list[str] = []
+    for day in sorted(to_check - found):
+        try:
+            if client.is_postseason_date(date.fromisoformat(day)):
+                found.add(day)
+        except SourceError:
+            unchecked.append(day)
+    return sorted(found), unchecked
 
 
 def save_bundle(bundle: DataBundle, path: Path) -> Path:
@@ -177,6 +213,7 @@ class SlateEntry:
                 "league_runs_per_game": round(self.projection.league_runs_per_game, 4),
                 "away_starter": self.projection.away_starter,
                 "home_starter": self.projection.home_starter,
+                "postseason_run_factor": self.projection.postseason_run_factor,
                 "notes": self.projection.notes,
             },
             "market": {
@@ -215,6 +252,8 @@ def build_slate(bundle: dict, target: date, *, settings: ProjectionSettings | No
     staff = {
         team: StaffSplit(**row) for team, row in bundle.get("staff", {}).items()
     }
+    postseason = target.isoformat() in bundle.get("postseason_dates", [])
+    unchecked = target.isoformat() in bundle.get("postseason_unchecked", [])
     entries: list[SlateEntry] = []
 
     for row in bundle["schedule"]:
@@ -237,6 +276,13 @@ def build_slate(bundle: dict, target: date, *, settings: ProjectionSettings | No
             park_factor=factor,
             staff=staff or None,
         )
+        if postseason:
+            projection = apply_postseason(projection, settings.postseason_run_factor)
+        elif unchecked:
+            projection.notes.append(
+                "postseason status unknown: NPB's daily page could not be read, "
+                "so no postseason adjustment was applied"
+            )
         blocking = _blocking_conditions(row, away_match, home_match, park, projection)
         entries.append(
             SlateEntry(

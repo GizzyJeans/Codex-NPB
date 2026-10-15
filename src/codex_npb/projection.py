@@ -9,11 +9,20 @@ and reports which inputs were actually available so the caller can set
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Iterable, Mapping
 
 from .staff import ROTATION_INNINGS_PER_APPEARANCE, LeagueStaffContext, StaffSplit
 from .teams import resolve
+
+# Postseason games score below what the two clubs' regular seasons predict:
+# across 177 Climax Series and Japan Series games in 2016-2025, totals ran at
+# 0.906 of the matchup of the clubs' regular-season scoring and allowing rates
+# (95% interval 0.838-0.975; 0.880 with a crude park adjustment). The ratio
+# includes aces starting more often, which the projection already sees through
+# the announced starter, so it is the milder of the two estimates.
+# Derivation: reports/2026-10-15-postseason-analysis.md, scripts/postseason/.
+POSTSEASON_RUN_FACTOR = 0.906
 
 
 class ProjectionError(ValueError):
@@ -92,6 +101,9 @@ class ProjectionSettings:
     The shrinkage constants are the number of games (or innings) at which an
     observed rate is weighted equally against the league mean. They exist to
     stop a small sample from producing a confident-looking projection.
+
+    ``postseason_run_factor`` scales both clubs' expected runs on a postseason
+    date; see ``POSTSEASON_RUN_FACTOR``.
     """
 
     starter_innings_share: float | None = None
@@ -101,6 +113,7 @@ class ProjectionSettings:
     home_field_advantage: float = 0.030
     max_park_factor: float = 1.25
     min_park_factor: float = 0.80
+    postseason_run_factor: float = POSTSEASON_RUN_FACTOR
 
     FALLBACK_STARTER_SHARE = 0.62
 
@@ -109,6 +122,8 @@ class ProjectionSettings:
             0 <= self.starter_innings_share <= 1
         ):
             raise ProjectionError("starter_innings_share must be between 0 and 1")
+        if not 0.5 <= self.postseason_run_factor <= 1.2:
+            raise ProjectionError("postseason_run_factor looks implausible")
         if self.bullpen_shrinkage_innings < 0:
             raise ProjectionError("bullpen_shrinkage_innings must be non-negative")
         if self.team_shrinkage_games < 0 or self.starter_shrinkage_innings < 0:
@@ -162,6 +177,7 @@ class GameProjection:
     home_starter: str | None = None
     inputs_used: dict[str, bool] = field(default_factory=dict)
     notes: list[str] = field(default_factory=list)
+    postseason_run_factor: float | None = None
 
     @property
     def total_mu(self) -> float:
@@ -180,6 +196,29 @@ class GameProjection:
             "final_draw_share": final_draw_share,
             "max_runs": 24,
         }
+
+
+def apply_postseason(projection: GameProjection, factor: float) -> GameProjection:
+    """Scale both clubs' expected runs for a postseason game.
+
+    The projection is built from regular-season rates, and postseason games
+    run lower than those predict. The factor is recorded on the projection
+    and in its notes so a slate shows which games were adjusted, and by how
+    much.
+    """
+    if projection.postseason_run_factor is not None:
+        raise ProjectionError("projection is already adjusted for the postseason")
+    return replace(
+        projection,
+        away_mu=projection.away_mu * factor,
+        home_mu=projection.home_mu * factor,
+        postseason_run_factor=factor,
+        notes=[
+            *projection.notes,
+            f"postseason game: both clubs' expected runs scaled by {factor:.3f} "
+            "from their regular-season projection",
+        ],
+    )
 
 
 def project_game(

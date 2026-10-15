@@ -104,10 +104,32 @@ class ScheduledGame:
     status: str = "scheduled"
     away_score: int | None = None
     home_score: int | None = None
+    game_number: int | None = None
 
     @property
     def starters_announced(self) -> bool:
         return bool(self.away_starter and self.home_starter)
+
+    @property
+    def is_postseason(self) -> bool:
+        return is_postseason_game(self.game_date, self.game_number)
+
+
+# The Climax Series and the Japan Series number their games from 1 again, and
+# neither runs past eight. By October every regular-season pairing is past its
+# twentieth meeting, so a played October or November game numbered that low is
+# a postseason game. An unplayed game carries no number on the schedule page;
+# for those, ``NPBOfficialClient.is_postseason_date`` reads the daily page.
+POSTSEASON_MAX_GAME_NUMBER = 8
+
+
+def is_postseason_game(game_date: date, game_number: int | None) -> bool:
+    """True for a played game the schedule numbers as a postseason game."""
+    return (
+        game_date.month >= 10
+        and game_number is not None
+        and 0 < game_number <= POSTSEASON_MAX_GAME_NUMBER
+    )
 
 
 def _strip_tags(fragment: str) -> str:
@@ -291,10 +313,13 @@ class NPBOfficialClient:
         return list(_parse_schedule(document, self.year, month))
 
     def season_game_log(self, months: Iterable[int] = range(3, 12)) -> list[GameResult]:
-        """Completed games for the season, read from the monthly schedule pages.
+        """Completed regular-season games, read from the monthly schedule pages.
 
         Far cheaper than one request per calendar day, and the monthly detail
-        table carries the same final scores as the daily result pages.
+        table carries the same final scores as the daily result pages. The
+        October page also lists the Climax Series, and its games are left out:
+        the calibration describes the regular season, and postseason games run
+        about a tenth lower (reports/2026-10-15-postseason-analysis.md).
         """
         log: list[GameResult] = []
         for month in months:
@@ -305,6 +330,8 @@ class NPBOfficialClient:
             for entry in entries:
                 if entry.status != "final" or entry.away_score is None:
                     continue
+                if entry.is_postseason:
+                    continue
                 log.append(
                     GameResult(
                         game_date=entry.game_date,
@@ -313,10 +340,21 @@ class NPBOfficialClient:
                         away_score=entry.away_score,
                         home_score=entry.home_score or 0,
                         venue=entry.venue,
-                        game_number=0,
+                        game_number=entry.game_number or 0,
                     )
                 )
         return log
+
+    def is_postseason_date(self, game_date: date) -> bool:
+        """Whether NPB titles this date's daily page as a postseason day.
+
+        Before and on the day, the page for a Climax Series or Japan Series
+        date says so in its title. Archived pages from earlier seasons are
+        retitled 公式戦, so this is for the current season's upcoming dates;
+        played games are classified by their number instead.
+        """
+        stamp = game_date.strftime("%Y%m%d")
+        return _is_postseason_title(self.fetch(f"/bis/{self.year}/games/gm{stamp}.html"))
 
 
 # --------------------------------------------------------------- parsers
@@ -529,6 +567,16 @@ _DIV_RE = {
 }
 _PIT_RE = re.compile(r'<div class="pit"[^>]*>(.*?)</div>', re.S)
 _WEATHER_RE = re.compile(r'<div class="weather"[^>]*>.*?alt="([^"]*)"', re.S)
+# A played game links to its box score, /scores/2026/1014/t-db-01/; the last
+# segment is the game's number within its pairing (or postseason series).
+_SCORE_LINK_RE = re.compile(r'href="/scores/\d{4}/\d{4}/[a-z]+-[a-z]+-(\d+)/"')
+_TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
+_POSTSEASON_TITLES = ("クライマックスシリーズ", "日本シリーズ")
+
+
+def _is_postseason_title(document: str) -> bool:
+    match = _TITLE_RE.search(document)
+    return bool(match) and any(name in match.group(1) for name in _POSTSEASON_TITLES)
 
 
 def _first(pattern: re.Pattern[str], body: str) -> str:
@@ -570,6 +618,7 @@ def _parse_schedule(document: str, year: int, month: int) -> Iterator[ScheduledG
         ]
         starters += ["", ""]
         weather_match = _WEATHER_RE.search(body)
+        link = _SCORE_LINK_RE.search(body)
         state = _first(_DIV_RE["state"], body)
         score1 = _first(_DIV_RE["score1"], body).strip()
         score2 = _first(_DIV_RE["score2"], body).strip()
@@ -592,4 +641,5 @@ def _parse_schedule(document: str, year: int, month: int) -> Iterator[ScheduledG
             status=status,
             away_score=int(score2) if final else None,
             home_score=int(score1) if final else None,
+            game_number=int(link.group(1)) if link else None,
         )
